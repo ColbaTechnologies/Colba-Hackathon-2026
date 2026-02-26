@@ -1,19 +1,13 @@
 import { useState } from "react";
+import type { Message } from "sdk";
 import StatusBadge from "./statusBadge";
 import type { StatusType } from "./statusBadge";
 import Detail from "./detail";
 
-export interface MessageData {
-    id: number;
-    url: string;
-    headers: string;
-    payload: string;
-    schedule: string;
-    status: StatusType;
-    retries: number;
-}
+// Re-export for consumers (backoffice.tsx)
+export type { Message };
 
-export default function MessageCard({ msg, isNew }: { msg: MessageData; isNew: boolean }) {
+export default function MessageCard({ msg, isNew }: { msg: Message; isNew: boolean }) {
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -23,13 +17,13 @@ export default function MessageCard({ msg, isNew }: { msg: MessageData; isNew: b
                     <span className="font-mono text-xs text-muted-foreground shrink-0">#{msg.id}</span>
                     <span className="font-mono text-sm truncate">{msg.url}</span>
                 </div>
-                <StatusBadge status={msg.status} />
+                <StatusBadge status={msg.status as StatusType} />
             </div>
 
             <div className="flex items-center gap-6 text-xs font-mono text-muted-foreground">
                 <span>
                     <span className="uppercase tracking-widest mr-1">Scheduled</span>
-                    {new Date(msg.schedule).toLocaleString()}
+                    {msg.schedule.toLocaleString()}
                 </span>
                 {msg.retries > 0 && (
                     <span className="text-destructive">
@@ -47,7 +41,7 @@ export default function MessageCard({ msg, isNew }: { msg: MessageData; isNew: b
 
             {expanded && (
                 <div className="grid grid-cols-1 gap-2 border-t border-border pt-3">
-                    <Detail label="Headers" value={msg.headers} />
+                    <Detail label="Headers" value={JSON.stringify(msg.headers, null, 2)} />
                     <Detail label="Payload" value={msg.payload} />
                 </div>
             )}

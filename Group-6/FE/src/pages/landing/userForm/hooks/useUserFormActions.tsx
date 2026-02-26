@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+import { createSdk } from "@/lib/sdk";
 
 export interface UserFormValues {
     url: string;
@@ -67,25 +66,17 @@ export function useUserFormActions() {
 
         setIsLoading(true);
 
-        const body = {
+        const client = createSdk({ apiKey: values.apiKey });
+
+        client.sendMessage({
             url: values.url,
             payload: values.payload,
-            headers: JSON.stringify({ "x-api-key": values.apiKey }),
-            ...(values.isScheduled === "yes" && values.scheduledTime
-                ? { schedule: new Date(values.scheduledTime).toISOString() }
-                : {}),
-        };
-
-        fetch(`${API_BASE_URL}/`, {
-            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            ...(values.isScheduled === "yes" && values.scheduledTime
+                ? { schedule: new Date(values.scheduledTime) }
+                : {}),
         })
-            .then(async (res) => {
-                if (!res.ok) {
-                    const data = await res.json().catch(() => ({}));
-                    throw new Error(data?.message ?? `Request failed with status ${res.status}`);
-                }
+            .then(() => {
                 setSubmitted(true);
                 toast.success("Message scheduled successfully!");
             })

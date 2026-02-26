@@ -31,10 +31,14 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "sdk": [
+        "../SDK/src/index.ts"
       ]
     }
   },
   "include": [
-    "src"
+    "src",
+    "../SDK/src"
   ]
 }
