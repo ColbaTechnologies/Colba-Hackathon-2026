@@ -5,7 +5,7 @@ namespace MessagingSystem.Domain.Entities;
 public class ReceivedMessage
 {
     public string Id { get; set; }
-    public string? ClientMessageId { get; init; }
+    public string? ClientMessageId { get; set; }
     public string DestinationUrl { get; init; } = default!;
     public string? SerializedPayload { get; init; }
     public Dictionary<string, string> Headers { get; init; } = new();
@@ -17,6 +17,7 @@ public class ReceivedMessage
     public DateTimeOffset CreatedAtUtc { get; init; }
     public DateTimeOffset? LastAttemptAtUtc { get; set; }
     public DateTimeOffset? NextAttemptAtUtc { get; set; }
+    
     public string? LastError { get; set; }
 
     public DateTimeOffset? DeliverAtUtc { get; init; }

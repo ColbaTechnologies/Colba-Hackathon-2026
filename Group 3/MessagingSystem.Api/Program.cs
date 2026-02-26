@@ -13,11 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 builder.Services.AddRavenDb(configuration);
 
-builder.Services.AddHttpClient("default")
+builder.Services.AddHttpClient<MessageProcessor>()
     .ConfigurePrimaryHttpMessageHandler(() =>
         new SocketsHttpHandler
         {
-            MaxConnectionsPerServer = 50
+            MaxConnectionsPerServer = 50,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+            AutomaticDecompression =
+                System.Net.DecompressionMethods.GZip |
+                System.Net.DecompressionMethods.Deflate
         });
 
 builder.Services.Configure<RetrySettings>(
@@ -25,6 +29,8 @@ builder.Services.Configure<RetrySettings>(
 
 builder.Services.AddSingleton(sp =>
     sp.GetRequiredService<IOptions<RetrySettings>>().Value);
+
+builder.Services.AddSingleton<IProcessorIdentifier, ProcessorIdentifier>();
 
 builder.Services.AddSingleton<ICallbackNotifier, HttpCallbackNotifier>();
 

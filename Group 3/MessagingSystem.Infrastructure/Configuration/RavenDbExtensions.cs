@@ -18,9 +18,10 @@ public static class RavenDbExtensions
         {
             return type switch
             {
-                not null when type == typeof(DeadLetterMessage) => "DeadLetterMessage",
-                not null when type == typeof(RetryMessage) => "RetryMessage",
-                not null when type == typeof(ProcessedMessage) => "Messages",
+                not null when type == typeof(DeadLetterMessage) => "DeadLetterMessages",
+                not null when type == typeof(RetryMessage) => "RetryMessages",
+                not null when type == typeof(ReceivedMessage) => "Messages",
+                not null when type == typeof(ProcessedMessage) => "ProcessedMessages",
                 _ => DocumentConventions.DefaultGetCollectionName(type)
             };
         }

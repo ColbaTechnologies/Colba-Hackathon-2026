@@ -3,18 +3,23 @@ using MessagingSystem.Application.Dtos;
 using MessagingSystem.Application.Interfaces;
 using MessagingSystem.Domain.Entities;
 using MessagingSystem.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Operations.CompareExchange;
+using Raven.Client.Documents.Session;
+using Raven.Client.Exceptions;
 
 namespace MessagingSystem.Infrastructure.Persistence;
 
-public class MessageStore(IDocumentStore store, IOptions<RetrySettings> settings) : IMessageStore
+public class MessageStore(IDocumentStore store, IOptions<RetrySettings> settings, ILogger<MessageStore> logger) : IMessageStore
 {
     public async Task<List<ReceivedMessage>> GetPendingMessagesAsync(
         DateTimeOffset utcNow,
         CancellationToken cancellationToken)
     {
         using var session = store.OpenAsyncSession();
+        var now = DateTimeOffset.UtcNow;
         var results = await session.Query<ReceivedMessage>()
             .Where(x => x.Status == MessageStatus.Pending)
             .OrderBy(x => x.NextAttemptAtUtc)
@@ -53,6 +58,45 @@ public class MessageStore(IDocumentStore store, IOptions<RetrySettings> settings
 
         return record;
     }
+    
+     public async Task<bool> TryClaimMessageForProcessingAsync(
+        string messageId,
+        string instanceId,
+        CancellationToken cancellationToken)
+    {
+        var lockKey = $"locks/messages/{messageId}";
+        
+        try
+        {
+            var getOp = new GetCompareExchangeValueOperation<string>(lockKey);
+            var existingLock = await store.Operations.SendAsync(
+                getOp,
+                sessionInfo: null,
+                token: cancellationToken);
+
+            if (existingLock != null)
+            {
+                return existingLock.Value == instanceId;
+            }
+
+            var putOp = new PutCompareExchangeValueOperation<string>(
+                lockKey, 
+                instanceId, 
+                0);
+
+            var result = await store.Operations.SendAsync(
+                putOp,
+                sessionInfo: null,
+                token: cancellationToken);
+
+            return !result.Successful;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error claiming message {MessageId}", messageId);
+            return false;
+        }
+    }
 
     public async Task MarkAsCompletedAsync(ReceivedMessage message, CancellationToken ct)
     {
@@ -69,12 +113,24 @@ public class MessageStore(IDocumentStore store, IOptions<RetrySettings> settings
         session.Delete(message.Id);
         await session.SaveChangesAsync(ct);
     }
+    
+    public async Task UpdateRetries(string messageId, int retries, CancellationToken ct)
+    {
+        using var session = store.OpenAsyncSession();
+        var item = await session.LoadAsync<RetryMessage>(messageId, ct);
+        item.AttemptCount = retries;
+        await session.StoreAsync(item, ct);
+        await session.SaveChangesAsync(ct);
+    }
 
     public async Task<IReadOnlyList<MessageSummary>>
         GetMessageOperationsAsync(
             string originalMessageId,
             CancellationToken ct)
     {
+        
+        // TODO make a multi-index on ravendb
+        
         using var session = store.OpenAsyncSession();
 
         var summaries = new List<MessageSummary>();

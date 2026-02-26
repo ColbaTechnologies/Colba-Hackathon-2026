@@ -18,6 +18,11 @@ public interface IMessageStore
         string? callbackUrl,
         CancellationToken? cancellationToken);
 
+    Task<bool> TryClaimMessageForProcessingAsync(
+        string messageId,
+        string instanceId,
+        CancellationToken cancellationToken);
+
     Task<ReceivedMessage?> TryGetByIdAsync(string id, CancellationToken cancellationToken);
 
     Task<ReceivedMessage?> TryGetByClientIdAsync(string clientMessageId, string? tenantId, CancellationToken cancellationToken);
@@ -36,4 +41,6 @@ public interface IMessageStore
     Task<IReadOnlyList<MessageSummary>> GetMessageOperationsAsync(
         string originalMessageId,
         CancellationToken ct);
+
+    Task UpdateRetries(string messageId, int retries, CancellationToken ct);
 }

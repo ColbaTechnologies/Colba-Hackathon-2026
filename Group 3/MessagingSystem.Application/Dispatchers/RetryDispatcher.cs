@@ -10,6 +10,7 @@ public sealed class RetryDispatcher(
     ILogger<RetryDispatcher> logger,
     IMessageStore store,
     IMessageProcessor processor,
+    IProcessorIdentifier processorIdentifier,
     RetrySettings settings)
     : BackgroundService
 {
@@ -30,12 +31,14 @@ public sealed class RetryDispatcher(
                 if (dueMessages.Count == 0)
                 {
                     await Task.Delay(
-                        TimeSpan.FromSeconds(3),
+                        TimeSpan.FromMilliseconds(30),
                         stoppingToken);
 
                     continue;
                 }
 
+                // TODO use the procesorIdentifier y el tryget
+                
                 foreach (var message in dueMessages)
                 {
                     if (stoppingToken.IsCancellationRequested)
@@ -59,6 +62,9 @@ public sealed class RetryDispatcher(
 
                             continue;
                         }
+                        
+                        await store.UpdateRetries(message.Id, message.AttemptCount, stoppingToken); 
+                        continue;
                     }
 
                     await store.MarkAsCompletedAsync(message.OriginalMessage, stoppingToken);
@@ -72,7 +78,7 @@ public sealed class RetryDispatcher(
             {
                 logger.LogError(ex, "Retry dispatcher error.");
                 await Task.Delay(
-                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromMilliseconds(20),
                     stoppingToken);
             }
         }

@@ -9,10 +9,11 @@ Group 3/MessagingSystem.Api/obj
 .DS_Store
 Group 3/.idea
 Group 3/MessagingSystem.Api/bin
->>>>>>> e8d650f (Create sln)
-Group 3/MessagingSystem.Application/bin
-Group 3/MessagingSystem.Application/obj
-Group 3/MessagingSystem.Domain/bin
-Group 3/MessagingSystem.Domain/obj
 Group 3/MessagingSystem.Infrastructure/bin
 Group 3/MessagingSystem.Infrastructure/obj
+Group 3/MessagingSystem.Infrastructure/obj
+Group 3/MessagingSystem.Application/bin
+Group 3/MessagingSystem.Application/obj
+Group 3/MessagingSystem.Infrastructure/bin
+Group 3/MessagingSystem.Domain/bin
+Group 3/MessagingSystem.Domain/obj

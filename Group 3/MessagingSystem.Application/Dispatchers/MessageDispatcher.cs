@@ -11,6 +11,7 @@ public sealed class MessageDispatcher(
     ILogger<MessageDispatcher> logger,
     IMessageStore store,
     IMessageProcessor processor,
+    IProcessorIdentifier processorIdentifier,
     ICallbackNotifier callbackNotifier,
     IOptions<RetrySettings> settings)
     : BackgroundService
@@ -34,47 +35,48 @@ public sealed class MessageDispatcher(
                 if (dueMessages.Count == 0)
                 {
                     await Task.Delay(
-                        TimeSpan.FromSeconds(2),
+                        TimeSpan.FromMilliseconds(20),
                         stoppingToken);
 
                     continue;
                 }
-
-                // Backpressure - explicit demo - Modern: await Parallel.ForEachAsync
-                using var semaphore = new SemaphoreSlim(settings.Value.MaxParallelism);
+                
                 var tasks = dueMessages.Select(async message =>
                 {
-                    await semaphore.WaitAsync(stoppingToken);
+                    var claimed = await store.TryClaimMessageForProcessingAsync(
+                        message.Id,
+                        processorIdentifier.InstanceId,
+                        stoppingToken);
 
-                    try
+                    if (claimed != null)
                     {
-                        var result =
-                            await processor.ProcessAsync(
-                                message,
-                                stoppingToken);
+                        try
+                        {
+                            var result = await processor.ProcessAsync(message, stoppingToken);
 
-                        if (result.Status == MessageStatus.Retry)
-                        {
-                            message.AttemptCount++;
-                            await store.MoveToRetryCollectionAsync(
-                                message,
-                                stoppingToken);
+                            if (result.Status == MessageStatus.Retry)
+                            {
+                                await store.MoveToRetryCollectionAsync(message, stoppingToken);
+                            }
+                            else
+                            {
+                                await store.MarkAsCompletedAsync(message, stoppingToken);
+                                await callbackNotifier.NotifyAsync(
+                                    message,
+                                    "Delivered",
+                                    stoppingToken);
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            await store.MarkAsCompletedAsync(
-                                message,
-                                stoppingToken);
-                            
-                            await callbackNotifier.NotifyAsync(message, "Delivered", stoppingToken);
+                            logger.LogError(
+                                ex,
+                                "Processing failed for message {MessageId}",
+                                message.Id);
                         }
-                    }
-                    finally
-                    {
-                        semaphore.Release();
                     }
                 });
-                
+
                 await Task.WhenAll(tasks);
             }
             catch (OperationCanceledException)
@@ -88,7 +90,7 @@ public sealed class MessageDispatcher(
                     "Unexpected error during Message Dispatcher.");
 
                 await Task.Delay(
-                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromMilliseconds(20),
                     stoppingToken);
             }
         }
