@@ -38,6 +38,7 @@ public class RetryConsumer(IAppDbContext dbContext, IHttpClientFactory httpClien
                     : MessageState.ToRetry;
 
             if (minimalMessage.State == MessageState.Failed) FromRetryToFailed(dbContext, minimalMessage);
+            if (minimalMessage.State == MessageState.Sent) FromRetryToMinimal(dbContext, minimalMessage);
         }
         catch (Exception e)
         {
