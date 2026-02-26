@@ -85,3 +85,9 @@
 /Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/OpenTelemetry.Exporter.Console.dll
 /Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/OpenTelemetry.Extensions.Hosting.dll
 /Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/OpenTelemetry.Instrumentation.AspNetCore.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/OpenTelemetry.Instrumentation.Runtime.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Google.Protobuf.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Grpc.Core.Api.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Grpc.Net.Client.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Grpc.Net.Common.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Serilog.Sinks.OpenTelemetry.dll

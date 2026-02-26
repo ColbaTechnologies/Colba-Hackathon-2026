@@ -1,20 +1,25 @@
-using System.Diagnostics.Metrics;
-using System.Threading.Channels;
 using Equipo1_QStash_Clone.Model;
 using Equipo1_QStash_Clone.Services;
-using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Raven.Client.Documents;
 using Serilog;
+using Serilog.Sinks.OpenTelemetry;
 
 const string serverUrl = "http://127.0.0.1:8080";
 const string databaseName = "MessageDB";
 
 var builder = WebApplication.CreateBuilder(args);
 
-var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = "http://localhost:4317";
+        options.Protocol = OtlpProtocol.Grpc;
+    })
+    .CreateLogger();
 
 
 builder.Host.UseSerilog(logger);
@@ -24,11 +29,11 @@ builder.Services.AddOpenTelemetry()
         .AddService(serviceName: builder.Environment.ApplicationName))
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()
         .AddOtlpExporter(exporter =>
         {
-            exporter.Endpoint = new Uri("http://127.0.0.1:4317");
+            exporter.Endpoint = new Uri("http://localhost");
             exporter.Protocol = OtlpExportProtocol.Grpc;
-            
         }));
 
         
@@ -69,7 +74,6 @@ app.MapGet("/health", () =>
 
 app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueRepository, IDocumentStore store) =>
 {
-    
     var channel = queueRepository.GetChannelQueue(inputMessage.QueueId);
     
     var currentMessage =new PersistedMessage

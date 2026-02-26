@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Equipo1_QStash_Clone")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a582e6417878c05a086d96bc8943218a8de5c4b8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c2eab018b5964b75837c8985de9378274e2506be")]
 [assembly: System.Reflection.AssemblyProductAttribute("Equipo1_QStash_Clone")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Equipo1_QStash_Clone")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
