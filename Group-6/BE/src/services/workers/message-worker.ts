@@ -13,10 +13,10 @@ export const initWorker = () => {
     queueService.on(MESSAGEQUEUE, (message: MessageData) => {
         console.log(`New message detected: ${message.id}`);
         workerQueue.add(async () => {
-            try{
+            try {
                 await processMessage(message);
-            }catch(error){
-                deadLetterQueueService.enqueue(message);
+            } catch (error) {
+                deadLetterQueueService.enqueue({ ...message, status: StatusType.FAILED });
             }
         });
     });
@@ -24,7 +24,7 @@ export const initWorker = () => {
 
 async function processMessage(message: MessageData, retryNumber: number = 1) {
     console.log(`Processing message:`, message.payload);
-    
+
     const config: AxiosRequestConfig = {
         headers: message.headers,
         timeout: 5000
@@ -36,7 +36,8 @@ async function processMessage(message: MessageData, retryNumber: number = 1) {
         console.log(`Set message succesfully. ${response.status} - ${JSON.stringify(response.data)}`);
         queueService.dequeue();
 
-        await updateMessageStatus(message.id, StatusType.SENT);
+        const updated = await updateMessageStatus(message.id, StatusType.SENT);
+        if (updated) queueService.notify(updated);
 
         return response.data;
     } catch (error: any) {
@@ -47,12 +48,13 @@ async function processMessage(message: MessageData, retryNumber: number = 1) {
         }
 
         console.log(`Retry number ${retryNumber}`)
-        if(retryNumber >= 3){
+        if (retryNumber >= 3) {
             console.log(`Set message as FAILED`)
-            await updateMessageStatus(message.id, StatusType.FAILED);
+            const failed = await updateMessageStatus(message.id, StatusType.FAILED);
+            if (failed) queueService.notify(failed);
             throw error;
         }
-        
-        await processMessage(message, retryNumber++);
+
+        await processMessage(message, ++retryNumber);
     }
 }

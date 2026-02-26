@@ -57,6 +57,10 @@ class QueueService extends EventEmitter {
         this.emit(this.eventMessage, message);
     }
 
+    public notify(message: MessageData) {
+        this.notifyUpdate(this.eventMessage, message);
+    }
+
     private notifyUpdate(messageType: string, message: MessageData) {
         const payload = JSON.stringify({
             queueName: messageType,
