@@ -5,6 +5,9 @@ import MessageCard from "./components/messageCard";
 import type { StatusType } from "./components/statusBadge";
 import { sdk } from "@/lib/sdk";
 
+const WS_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:3000")
+    .replace(/^http/, "ws");
+
 const SLIDE_STYLE = `
 @keyframes slideInLeft {
   from { transform: translateX(-200px); opacity: 0; }
@@ -29,21 +32,47 @@ export default function Backoffice() {
             .finally(() => setIsLoading(false));
     }, []);
 
-    function addMessage(msg: Message) {
-        setMessages((prev) => [msg, ...prev]);
-        setNewIds((prev) => new Set(prev).add(msg.id));
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => {
-            setNewIds((prev) => {
-                const next = new Set(prev);
-                next.delete(msg.id);
-                return next;
-            });
-        }, 600);
-    }
+    useEffect(() => {
+        const socket = new WebSocket(WS_URL);
 
-    // Expose for external callers (e.g. WebSocket integration)
-    void addMessage;
+        socket.onmessage = (event) => {
+            try {
+                const { message: raw } = JSON.parse(event.data) as {
+                    queueName: string;
+                    message: Message;
+                };
+                const msg: Message = { ...raw, schedule: new Date(raw.schedule) };
+
+                setMessages((prev) => {
+                    const idx = prev.findIndex((m) => m.id === msg.id);
+                    if (idx === -1) return [msg, ...prev];
+                    const next = [...prev];
+                    next[idx] = msg;
+                    return next;
+                });
+
+                setNewIds((prev) => new Set(prev).add(msg.id));
+                if (timerRef.current) clearTimeout(timerRef.current);
+                timerRef.current = setTimeout(() => {
+                    setNewIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(msg.id);
+                        return next;
+                    });
+                }, 600);
+            } catch {
+                // ignore malformed frames
+            }
+        };
+
+        return () => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            } else {
+                socket.onopen = () => socket.close();
+            }
+        };
+    }, []);
 
     const counts = messages.reduce(
         (acc, m) => ({ ...acc, [m.status]: (acc[m.status as StatusType] ?? 0) + 1 }),
