@@ -4,4 +4,3 @@ obj/
 .vs/
 .idea/
 *.DotSettings.user
-Properties/launchSettings.json
