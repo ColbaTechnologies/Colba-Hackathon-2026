@@ -26,6 +26,9 @@ services.AddTransient<IProducer, Producer>();
 services.AddTransient<IProducer, Producer>();
 services.AddTransient<IConsumer, Consumer>();
 
+services.AddTransient<IMessageRepository, MessageRepository>();
+
+
 services.AddQuartzJobs(builder.Configuration);
 
 

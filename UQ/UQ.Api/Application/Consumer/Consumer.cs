@@ -6,7 +6,7 @@ using UQ.Api.Infrastructure;
 
 namespace UQ.Api.Application;
 
-public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFactory) : IConsumer
+public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<Consumer> logger) : IConsumer
 {
     public async Task ExecuteCall(MinimalMessageData data)
     {
@@ -31,8 +31,24 @@ public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFact
         }
         
         var response = await client.PostAsync(data.DestinationUrl, new StringContent(message.Body)); // TODO: fill with real content
-        Console.WriteLine(await response.Content.ReadAsStringAsync());
-        // TODO: callbacks
         
+        var minimalMessage = await dbContext.MinimalMessages.FirstOrDefaultAsync(m => m.Id == data.Id);
+
+        if (minimalMessage is null)
+        {
+            logger.LogWarning("Called consumer for non existing message with {DataId}", data.Id);
+            return;
+        }
+        
+        if (response.IsSuccessStatusCode)
+        {
+            minimalMessage.State = MessageState.Sent;
+            return;
+        }
+        
+        minimalMessage.State = MessageState.Failed;
+
+        // TODO: callbacks
+        // TODO: retries
     }
 }
