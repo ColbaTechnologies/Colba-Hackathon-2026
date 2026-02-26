@@ -1,8 +1,15 @@
 import EventEmitter from "events";
 import { MessageData } from "../models/messageData";
 
+export const MESSAGEADDED: string = "messageAdded";
+export const MESSAGEFAILED: string = "messageFailed";
+
 class QueueService extends EventEmitter{
     private readonly store: MessageData[] = [];
+
+    constructor(private eventMessage: string) {
+        super();
+    }
 
     public get length(): number {
         return this.store.length;
@@ -18,11 +25,12 @@ class QueueService extends EventEmitter{
 
     public enqueue(message: MessageData) {
         this.store.push(message);
-        this.emit('messageAdded', message);
+        this.emit(this.eventMessage, message);
     }
     public dequeue(): MessageData | undefined {
         return this.store.shift();
     }
 }
 
-export const queueService = new QueueService();
+export const queueService = new QueueService(MESSAGEADDED);
+export const deadLetterQueueService = new QueueService(MESSAGEFAILED);
