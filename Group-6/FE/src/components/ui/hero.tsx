@@ -1,6 +1,6 @@
 export default function Hero() {
     return (
-        <div className="flex flex-col justify-center gap-6 border-r border-border px-10 py-16">
+        <div className="flex flex-col justify-center gap-6 px-10 py-16">
             <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
                 <span className="text-foreground">Configure your</span> <br />
                 <span className="text-primary">API request</span>

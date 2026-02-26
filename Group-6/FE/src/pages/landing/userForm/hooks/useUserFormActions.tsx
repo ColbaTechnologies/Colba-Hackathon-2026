@@ -76,7 +76,7 @@ export function useUserFormActions() {
                 : {}),
         };
 
-        fetch(`${API_BASE_URL}/api/messages`, {
+        fetch(`${API_BASE_URL}/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
