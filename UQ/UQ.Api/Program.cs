@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using UQ.Api.Application;
 using UQ.Api.Application.Consumer;
 using UQ.Api.Application.Producer;
 using UQ.Api.Application.Repositories;
@@ -17,10 +16,7 @@ services.AddSwaggerGen();
 services.AddControllers();
 services.AddHealthChecks();
 
-services.AddDbContextPool<AppDbContext>(opt =>
-{
-    opt.UseMySQL(builder.Configuration.GetConnectionString("uqDb"));
-});
+services.AddDbContextPool<AppDbContext>(opt => { opt.UseMySQL(builder.Configuration.GetConnectionString("uqDb")); });
 services.AddTransient<DbContext, AppDbContext>();
 services.AddTransient<IAppDbContext, AppDbContext>();
 
@@ -49,8 +45,8 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    "default",
+    "{controller=Home}/{action=Index}/{id?}");
 app.MapHealthChecks("/health");
 
 
@@ -58,7 +54,7 @@ app.Run();
 
 namespace UQ.Api
 {
-    record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+    internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     {
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }

@@ -10,6 +10,6 @@ public interface IAppDbContext : IDisposable
     public DbSet<FailedMessage> FailedMessages { get; }
     public DbSet<MessageHeader> MessageHeaders { get; }
     public DbSet<MessageBody> MessageBodies { get; }
-    
+
     public Task<int> SaveChangesAsync();
 }

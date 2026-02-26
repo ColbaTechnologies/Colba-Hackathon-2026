@@ -15,7 +15,7 @@ public class Producer(IAppDbContext dbContext) : IProducer
         await dbContext.MessageBodies.AddAsync(messageBody);
         await dbContext.MessageHeaders.AddRangeAsync(messageHeaders);
         await dbContext.SaveChangesAsync();
-        
+
         return new SavePendingMessageResult(true, message.PublicId);
     }
 }

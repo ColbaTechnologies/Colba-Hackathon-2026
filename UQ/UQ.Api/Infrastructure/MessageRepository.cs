@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using UQ.Api.Application;
 using UQ.Api.Application.Repositories;
 using UQ.Api.Domain;
 

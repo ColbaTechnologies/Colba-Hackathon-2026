@@ -20,14 +20,11 @@ public class RetryJob(IAppDbContext dbContext, IRetryConsumer consumer) : IJob
         {
             minimal.State = MessageState.Processing;
             minimal.RetryCount++;
-            minimal.UpdatedAt = DateTime.UtcNow; 
+            minimal.UpdatedAt = DateTime.UtcNow;
         }
-        
+
         await dbContext.SaveChangesAsync();
 
-        foreach (var minimal in requestsToSend)
-        {
-            await consumer.ExecuteCall(minimal.ToRetryData());
-        }
+        foreach (var minimal in requestsToSend) await consumer.ExecuteCall(minimal.ToRetryData());
     }
 }

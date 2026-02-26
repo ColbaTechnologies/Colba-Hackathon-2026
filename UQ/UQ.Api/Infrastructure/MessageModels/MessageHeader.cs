@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace UQ.Api.Infrastructure.MessageModels;
 
 public class MessageHeader

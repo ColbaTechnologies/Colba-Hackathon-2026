@@ -19,14 +19,11 @@ public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
         foreach (var minimal in requestsToSend)
         {
             minimal.State = MessageState.Processing;
-            minimal.UpdatedAt = DateTime.UtcNow; 
+            minimal.UpdatedAt = DateTime.UtcNow;
         }
-        
+
         await dbContext.SaveChangesAsync();
 
-        foreach (var minimal in requestsToSend)
-        { 
-            await consumer.ExecuteCall(minimal.ToData());
-        }
+        foreach (var minimal in requestsToSend) await consumer.ExecuteCall(minimal.ToData());
     }
 }

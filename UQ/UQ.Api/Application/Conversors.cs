@@ -8,16 +8,17 @@ public static class Conversors
 {
     public static CreateMessageInput ToMessageInput(this InputEntry input)
     {
-        return new CreateMessageInput(input.DestinationUri, input.Headers, input.Body, input.ScheduledOn, input.CallbackUrl,
+        return new CreateMessageInput(input.DestinationUri, input.Headers, input.Body, input.ScheduledOn,
+            input.CallbackUrl,
             input.CallerRequestId);
     }
 
     public static (MinimalMessage, MessageBody, List<MessageHeader>) ToDatabaseMessage(this Message message)
     {
-        var minimalMessage = new MinimalMessage()
+        var minimalMessage = new MinimalMessage
         {
             Id = message.Id,
-            PublicId =  message.PublicId,
+            PublicId = message.PublicId,
             DestinationUrl = message.DestinationUrl,
             State = message.State,
             ScheduledOn = message.ScheduledOn?.UtcDateTime,
@@ -26,30 +27,30 @@ public static class Conversors
             CallbackUrl = message.CallbackUrl,
             CallerRequestId = message.CallerRequestId
         };
-        
-        var messageBody = new MessageBody()
+
+        var messageBody = new MessageBody
         {
             BodyValue = message.Body,
             MessageId = message.Id
         };
 
         var messageHeaders =
-            message.Headers.Select(x => new MessageHeader()
+            message.Headers.Select(x => new MessageHeader
             {
                 MessageId = message.Id,
                 HeaderKey = x.Key,
                 HeaderValue = x.Value
             }).ToList();
-        
+
         return (minimalMessage, messageBody, messageHeaders);
     }
 
     public static MinimalMessageData ToData(this MinimalMessage message)
     {
-        return new MinimalMessageData()
+        return new MinimalMessageData
         {
             Id = message.Id,
-            PublicId =  message.PublicId,
+            PublicId = message.PublicId,
             DestinationUrl = message.DestinationUrl,
             State = message.State,
             ScheduledOn = message.ScheduledOn, // TODO: handle schedules
@@ -57,13 +58,13 @@ public static class Conversors
             CallerRequestId = message.CallerRequestId
         };
     }
-    
+
     public static MinimalMessageToRetryData ToRetryData(this MinimalMessageToRetry message)
     {
-        return new MinimalMessageToRetryData()
+        return new MinimalMessageToRetryData
         {
             Id = message.Id,
-            PublicId =  message.PublicId,
+            PublicId = message.PublicId,
             DestinationUrl = message.DestinationUrl,
             State = message.State,
             ScheduledOn = message.ScheduledOn, // TODO: handle schedules
@@ -74,39 +75,38 @@ public static class Conversors
             UpdatedAt = message.UpdatedAt
         };
     }
-    
+
     public static MinimalMessageToRetry ToRetry(this MinimalMessage message)
     {
-        return new MinimalMessageToRetry()
+        return new MinimalMessageToRetry
         {
             Id = message.Id,
-            PublicId =  message.PublicId,
+            PublicId = message.PublicId,
             DestinationUrl = message.DestinationUrl,
             State = message.State,
             ScheduledOn = message.ScheduledOn,
             CallbackUrl = message.CallbackUrl,
             CallerRequestId = message.CallerRequestId,
             RetryCount = 0,
-            CreatedAt =  message.CreatedAt,
-            UpdatedAt =  DateTime.UtcNow
+            CreatedAt = message.CreatedAt,
+            UpdatedAt = DateTime.UtcNow
         };
     }
-    
+
     public static FailedMessage ToFailed(this MinimalMessage message, int RetryCount = 0)
     {
-        return new FailedMessage()
+        return new FailedMessage
         {
             Id = message.Id,
-            PublicId =  message.PublicId,
+            PublicId = message.PublicId,
             DestinationUrl = message.DestinationUrl,
             State = message.State,
             ScheduledOn = message.ScheduledOn,
             CallbackUrl = message.CallbackUrl,
             CallerRequestId = message.CallerRequestId,
             RetryCount = RetryCount,
-            CreatedAt =  message.CreatedAt,
-            UpdatedAt =  DateTime.UtcNow,
+            CreatedAt = message.CreatedAt,
+            UpdatedAt = DateTime.UtcNow
         };
     }
-
 }

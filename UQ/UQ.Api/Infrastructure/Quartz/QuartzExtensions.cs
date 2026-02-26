@@ -1,5 +1,4 @@
 using Quartz;
-using UQ.Api.Application;
 using UQ.Api.Application.Jobs;
 
 namespace UQ.Api.Infrastructure.Quartz;
