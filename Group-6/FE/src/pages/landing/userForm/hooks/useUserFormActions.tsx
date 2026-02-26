@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { toast } from "sonner";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export interface UserFormValues {
     url: string;
@@ -19,6 +22,7 @@ const initialValues: UserFormValues = {
 export function useUserFormActions() {
     const [values, setValues] = useState<UserFormValues>(initialValues);
     const [submitted, setSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<Partial<Record<keyof UserFormValues, string>>>({});
 
     function handleChange(
@@ -60,9 +64,37 @@ export function useUserFormActions() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!validate()) return;
-        // TODO: wire up to API
-        console.log("Submitting:", values);
-        setSubmitted(true);
+
+        setIsLoading(true);
+
+        const body = {
+            url: values.url,
+            payload: values.payload,
+            headers: JSON.stringify({ "x-api-key": values.apiKey }),
+            ...(values.isScheduled === "yes" && values.scheduledTime
+                ? { schedule: new Date(values.scheduledTime).toISOString() }
+                : {}),
+        };
+
+        fetch(`${API_BASE_URL}/api/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data?.message ?? `Request failed with status ${res.status}`);
+                }
+                setSubmitted(true);
+                toast.success("Message scheduled successfully!");
+            })
+            .catch((err: Error) => {
+                toast.error(err.message);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }
 
     function handleReset() {
@@ -71,5 +103,5 @@ export function useUserFormActions() {
         setSubmitted(false);
     }
 
-    return { values, errors, submitted, handleChange, handleSubmit, handleReset };
+    return { values, errors, submitted, isLoading, handleChange, handleSubmit, handleReset };
 }

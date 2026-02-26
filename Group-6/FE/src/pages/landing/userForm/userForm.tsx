@@ -34,12 +34,10 @@ export function UserForm() {
             onSubmit={handleSubmit}
             className="flex flex-col gap-7 w-full max-w-md"
         >
-            {/* Title */}
             <div className="border-b border-border pb-4">
                 <span className="text-xs font-mono tracking-widest uppercase text-primary">New request</span>
             </div>
 
-            {/* URL */}
             <div className="flex flex-col gap-2">
                 <label htmlFor="url" className={labelCls}>URL</label>
                 <input
@@ -54,7 +52,6 @@ export function UserForm() {
                 {errors.url && <p className="text-xs text-destructive">{errors.url}</p>}
             </div>
 
-            {/* Payload */}
             <div className="flex flex-col gap-2">
                 <label htmlFor="payload" className={labelCls}>Payload</label>
                 <textarea
@@ -69,7 +66,6 @@ export function UserForm() {
                 {errors.payload && <p className="text-xs text-destructive">{errors.payload}</p>}
             </div>
 
-            {/* API Key */}
             <div className="flex flex-col gap-2">
                 <label htmlFor="apiKey" className={labelCls}>API Key</label>
                 <input
@@ -84,7 +80,6 @@ export function UserForm() {
                 {errors.apiKey && <p className="text-xs text-destructive">{errors.apiKey}</p>}
             </div>
 
-            {/* Scheduled */}
             <div className="flex flex-col gap-3">
                 <label className={labelCls}>Scheduled message?</label>
                 <div className="flex gap-6">
@@ -116,7 +111,6 @@ export function UserForm() {
                 </div>
             </div>
 
-            {/* Time picker – shown only when scheduled */}
             {values.isScheduled === "yes" && (
                 <div className="flex flex-col gap-2">
                     <label htmlFor="scheduledTime" className={labelCls}>Scheduled time</label>
