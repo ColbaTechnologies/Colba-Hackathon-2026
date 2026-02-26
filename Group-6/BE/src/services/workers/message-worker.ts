@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { MessageData } from '../../models/messageData';
-import { deadLetterQueueService, MESSAGEADDED, MESSAGEFAILED, queueService } from '../queue';
+import { deadLetterQueueService, MESSAGEQUEUE, queueService } from '../queue';
 import PQueue from 'p-queue';
 import { updateMessageStatus } from '../../repositories/messages.repository';
 import { StatusType } from '../../models/statusType';
@@ -10,7 +10,7 @@ const workerQueue = new PQueue({ concurrency: 100 });
 export const initWorker = () => {
     console.log("Worker listening...");
 
-    queueService.on(MESSAGEADDED, (message: MessageData) => {
+    queueService.on(MESSAGEQUEUE, (message: MessageData) => {
         console.log(`New message detected: ${message.id}`);
         workerQueue.add(async () => {
             try{
