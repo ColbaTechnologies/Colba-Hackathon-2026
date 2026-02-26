@@ -5,10 +5,15 @@ import messageRoutes from './routes/messages.routes';
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'x-api-key'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-app.use("/messages", router)
 // Routes
 app.use('/messages', messageRoutes);
 

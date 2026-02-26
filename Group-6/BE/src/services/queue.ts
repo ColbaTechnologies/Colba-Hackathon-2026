@@ -1,15 +1,14 @@
 import EventEmitter from "events";
 import { MessageData } from "../models/messageData";
 import { WebSocketServer } from "ws";
-import config from "../config/config";
-import { ws } from "../server";
+import { ws } from "../websocket";
 
 
 export const MESSAGEQUEUE: string = "messageQueue";
 export const DEADLETTERQUEUE: string = "deadLetterQueue";
 export const SCHEDULEDQUEUE: string = "scheduledQueue";
 
-class QueueService extends EventEmitter{
+class QueueService extends EventEmitter {
     private readonly queue: MessageData[] = [];
 
     constructor(private eventMessage: string,
@@ -43,16 +42,16 @@ class QueueService extends EventEmitter{
     public enqueueScheduled(message: MessageData) {
         let low = 0
         let high = this.queue.length
-        
-        while(low < high){
+
+        while (low < high) {
             const mid = Math.floor((low + high) / 2)
-            if(this.queue[mid].schedule! < message.schedule!){
+            if (this.queue[mid].schedule! < message.schedule!) {
                 low = mid + 1
-            }else{
+            } else {
                 high = mid
             }
         }
-        
+
         this.queue.splice(low, 0, message);
         this.notifyUpdate(this.eventMessage, message)
         this.emit(this.eventMessage, message);

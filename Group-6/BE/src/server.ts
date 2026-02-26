@@ -1,9 +1,16 @@
-import { WebSocketServer } from 'ws';
+import http from 'http';
 import app from './app';
 import config from './config/config';
+import { ws } from './websocket';
 
-export const ws = new WebSocketServer({port: config.port});
+const server = http.createServer(app);
 
-app.listen(config.port, () => {
+server.on('upgrade', (request, socket, head) => {
+  ws.handleUpgrade(request, socket, head, (client) => {
+    ws.emit('connection', client, request);
+  });
+});
+
+server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);
 });
