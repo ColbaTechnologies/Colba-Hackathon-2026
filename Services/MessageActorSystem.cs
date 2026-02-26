@@ -20,21 +20,19 @@ public sealed class MessageActorSystem(
     private readonly ConcurrentDictionary<string, PID> _registry = new();
 
     /// <summary>
-    /// Spawns a new <see cref="MessageActor"/> for the given request and returns
-    /// the generated request ID that the caller can use to poll status.
+    /// Spawns a new <see cref="MessageActor"/> for the given request.
+    /// The caller is responsible for supplying a unique <paramref name="requestId"/>
+    /// so it can be correlated with the actor from the HTTP layer.
     /// </summary>
-    public string Enqueue(string targetUrl, JsonElement payload)
+    public void Enqueue(string requestId, string targetUrl, JsonElement payload)
     {
-        var requestId = Guid.NewGuid().ToString("N");
-        var logger    = loggerFactory.CreateLogger<MessageActor>();
+        var logger = loggerFactory.CreateLogger<MessageActor>();
 
         var props = Props.FromProducer(() =>
             new MessageActor(requestId, targetUrl, payload, httpClientFactory, logger));
 
         var pid = system.Root.Spawn(props);
         _registry[requestId] = pid;
-
-        return requestId;
     }
 
     /// <summary>

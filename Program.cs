@@ -41,7 +41,8 @@ app.MapPost("/messages", (InboundRequest request, MessageActorSystem actorSystem
     if (string.IsNullOrWhiteSpace(request.TargetUrl))
         return Results.BadRequest(new { error = "targetUrl is required." });
 
-    var requestId = actorSystem.Enqueue(request.TargetUrl, request.Payload);
+    var requestId = Guid.NewGuid().ToString("N");
+    actorSystem.Enqueue(requestId, request.TargetUrl, request.Payload);
 
     return Results.Accepted(
         $"/messages/{requestId}",
