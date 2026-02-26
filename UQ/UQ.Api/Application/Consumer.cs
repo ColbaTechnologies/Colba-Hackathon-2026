@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using UQ.Api.Domain;
 using UQ.Api.Domain.Partial;
@@ -9,8 +10,6 @@ public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFact
 {
     public async Task ExecuteCall(MinimalMessageData data)
     {
-        // load message parts
-        /*
         var headers = await dbContext.MessageHeaders.Where(x => x.MessageId == data.Id).ToListAsync();
         var body = await dbContext.MessageBodies.FirstOrDefaultAsync(x => x.MessageId == data.Id);
 
@@ -25,15 +24,15 @@ public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFact
             data.UpdatedAt
             ));
         
-        */
-        // build message
-        
-        
-        // send message
         var client = httpClientFactory.CreateClient();
-        var response = await client.PostAsync(data.DestinationUrl, new MultipartContent()); // TODO: fill with real content
+        foreach (var header in headers)
+        {
+            client.DefaultRequestHeaders.Add(header.HeaderKey, header.HeaderValue);
+        }
+        
+        var response = await client.PostAsync(data.DestinationUrl, new StringContent(message.Body)); // TODO: fill with real content
         Console.WriteLine(await response.Content.ReadAsStringAsync());
-        // callbacks
+        // TODO: callbacks
         
     }
 }
