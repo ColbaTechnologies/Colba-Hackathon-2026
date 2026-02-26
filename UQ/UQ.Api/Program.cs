@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UQ.Api.Application;
 using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,6 @@ services.AddSwaggerGen();
 services.AddControllers();
 services.AddHealthChecks();
 
-
 services.AddDbContextPool<AppDbContext>(opt =>
 {
     opt.UseMySQL(builder.Configuration.GetConnectionString("uqDb"));
@@ -21,10 +21,12 @@ services.AddDbContextPool<AppDbContext>(opt =>
 services.AddTransient<DbContext, AppDbContext>();
 services.AddTransient<IAppDbContext, AppDbContext>();
 
+builder.Services.AddHttpClient();
 services.AddTransient<IProducer, Producer>();
 services.AddTransient<IProducer, Producer>();
 services.AddTransient<IConsumer, Consumer>();
 
+services.AddQuartzJobs(builder.Configuration);
 
 
 var app = builder.Build();
