@@ -4,14 +4,24 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>WebApplication1</RootNamespace>
+        <RootNamespace>MessagingSystem</RootNamespace>
         <UserSecretsId>38f536e2-3f33-42bd-bd58-48cb4089b926</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20"/>
         <PackageReference Include="RavenMigrations" Version="6.0.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MessagingSystem.Application\MessagingSystem.Application.csproj" />
+      <ProjectReference Include="..\MessagingSystem.Domain\MessagingSystem.Domain.csproj" />
+      <ProjectReference Include="..\MessagingSystem.Infrastructure\MessagingSystem.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "MessagingSystem.Domain/1.0.0": {
+        "runtime": {
+          "MessagingSystem.Domain.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MessagingSystem.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
