@@ -2,6 +2,7 @@ import http from 'http';
 import app from './app';
 import config from './config/config';
 import { ws } from './websocket';
+import { loadPendingMessages } from './repositories/messages.repository';
 
 const server = http.createServer(app);
 
@@ -14,3 +15,5 @@ server.on('upgrade', (request, socket, head) => {
 server.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);
 });
+
+loadPendingMessages()

@@ -2,7 +2,7 @@ import { MessageData } from "../models/messageData"
 import { StatusType } from "../models/statusType"
 import { saveMessage, fetchMessages } from "../repositories/messages.repository"
 import { validateApiKey } from "../utils/validateApiKey"
-import { queueService } from "./queue"
+import { queueService, scheduledQueueService } from "./queue"
 
 export const getMessages = async () => {
     return await fetchMessages()
@@ -21,6 +21,12 @@ export const createMessage = async (messageData:  Omit<MessageData, "id" | "stat
     }
     
     const savedMessage = await saveMessage(message)
-    queueService.enqueue(savedMessage)
+
+    if (savedMessage.schedule) {
+        scheduledQueueService.enqueueScheduled(savedMessage)
+    } else {
+        queueService.enqueue(savedMessage)
+    }
+    
     return savedMessage
 }

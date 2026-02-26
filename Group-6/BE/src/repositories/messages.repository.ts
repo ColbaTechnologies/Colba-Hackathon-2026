@@ -1,6 +1,7 @@
 import store from "../config/database";
 import { MessageData, messages } from "../models/messageData";
 import { StatusType } from "../models/statusType";
+import { queueService, scheduledQueueService } from "../services/queue";
 
 export const saveMessage = async (message: MessageData): Promise<MessageData> => {
     const session = store.openSession();
@@ -29,4 +30,21 @@ export const updateMessageStatus = async (id: string, status: StatusType): Promi
     await session.saveChanges();
 
     return message;
+}
+
+export async function loadPendingMessages() {
+    const session = store.openSession();
+    const pendingMessages: MessageData[] = await session
+        .query<MessageData>({ collection: "Messages" })
+        .whereEquals("status", StatusType.PENDING)
+        .all();
+    for (const msg of pendingMessages) {
+        if (msg.schedule) {
+            scheduledQueueService.enqueueScheduled(msg)
+        } else {
+            queueService.enqueue(msg)
+        }
+    }
+
+    return pendingMessages;
 }
