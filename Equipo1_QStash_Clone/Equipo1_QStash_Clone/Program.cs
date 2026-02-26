@@ -92,13 +92,12 @@ app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueR
     return Results.Ok();
 });
 
-app.MapPost("/queue", async (string queueName, bool deathLetterEnable, IDocumentStore store, QueueRepository queueRepository, int retries = 3) =>
+app.MapPost("/queue", async (string queueName, bool deathLetterEnable, IDocumentStore store, QueueRepository queueRepository) =>
 {
     var newQueue = new Queue
     {
         Id = Guid.NewGuid().ToString(),
         Name =  queueName.ToLowerInvariant(),
-        Retries = retries,
     };
 
     if (deathLetterEnable)
