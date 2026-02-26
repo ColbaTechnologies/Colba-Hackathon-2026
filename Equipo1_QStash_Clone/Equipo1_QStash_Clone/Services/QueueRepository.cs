@@ -5,7 +5,7 @@ using Raven.Client.Documents.Linq;
 
 namespace Equipo1_QStash_Clone.Services;
 
-public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore store)
+public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore store, QueueMetrics metrics)
 {
     private static Dictionary<string, Channel<string>>  _queue = new();
     private static Dictionary<string, Consumer >  _consummer = new();
@@ -18,8 +18,8 @@ public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore sto
     public void CreateQueue(string queueId)
     {
         _queue[queueId] = Channel.CreateUnbounded<string>();
-        var consumer = new Consumer(logger, _queue[queueId], store);
-        _ = Task.Run(async () => {await consumer.Start(queueId); });
+        var consumer = new Consumer(logger, _queue[queueId], store, metrics);
+        _ = Task.Run(async () => { await consumer.Start(queueId); });
         _consummer.Add(queueId, consumer);
         
         var session = store.OpenSession();   

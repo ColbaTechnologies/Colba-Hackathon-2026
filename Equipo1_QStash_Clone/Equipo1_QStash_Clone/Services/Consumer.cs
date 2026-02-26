@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Threading.Channels;
 using Equipo1_QStash_Clone.Model;
 using Polly;
@@ -5,7 +6,7 @@ using Raven.Client.Documents;
 
 namespace Equipo1_QStash_Clone.Services;
 
-public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore store)
+public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore store, QueueMetrics metrics)
 {
 
     private readonly HttpClient _httpClient = new();
@@ -37,12 +38,19 @@ public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore st
                     
                     logger.LogInformation("Send message: {MessageId} {Retry}", message.Id, message.InputMessage.Retries);
 
+                    var sw = Stopwatch.StartNew();
                     var response = await retryPolicy.ExecuteAsync(() =>
                         _httpClient.SendAsync(CreateHttpRequestMessage(message))
                     );
-                    
-                    if (!response.IsSuccessStatusCode)
+                    metrics.RecordDeliveryDuration(sw, queueId);
+
+                    if (response.IsSuccessStatusCode)
                     {
+                        metrics.MessageDelivered(queueId);
+                    }
+                    else
+                    {
+                        metrics.MessageDeliveryFailed(queueId);
 
                         await session.StoreAsync(new ErrorMessage
                         {
@@ -50,8 +58,10 @@ public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore st
                             Error = response.ReasonPhrase,
                             PersistedMessage = message
                         });
+
+                        metrics.DeadLetterMessage(queueId);
                     }
-                    
+
                     session.Delete(message);
                 }
                 catch (Exception e)

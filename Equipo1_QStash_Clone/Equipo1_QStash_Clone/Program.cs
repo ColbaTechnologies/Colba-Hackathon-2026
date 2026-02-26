@@ -3,6 +3,7 @@ using Equipo1_QStash_Clone.Services;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Raven.Client.Documents;
 using Serilog;
 using Serilog.Sinks.OpenTelemetry;
@@ -11,7 +12,7 @@ const string serverUrl = "http://127.0.0.1:8080";
 const string databaseName = "MessageDB";
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddSingleton<QueueMetrics>();
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.OpenTelemetry(options =>
@@ -30,14 +31,22 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
+        .AddMeter(QueueMetrics.MeterName)
         .AddOtlpExporter(exporter =>
         {
-            exporter.Endpoint = new Uri("http://localhost");
+            exporter.Endpoint = new Uri("http://localhost:4317");
+            exporter.Protocol = OtlpExportProtocol.Grpc;
+        }))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(exporter =>
+        {
+            exporter.Endpoint = new Uri("http://localhost:4317");
             exporter.Protocol = OtlpExportProtocol.Grpc;
         }));
 
         
-//builder.Services.AddHostedService<Consumer>();
 builder.Services.AddSingleton<QueueRepository>();
 builder.Services.AddHostedService<ChannelSeeder>();
 
@@ -72,8 +81,9 @@ app.MapGet("/health", () =>
     .WithName("health")
     .WithOpenApi();
 
-app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueRepository, IDocumentStore store) =>
+app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueRepository, IDocumentStore store, QueueMetrics metrics) =>
 {
+    var sw = metrics.StartPublishTimer();
     var channel = queueRepository.GetChannelQueue(inputMessage.QueueId);
     
     var currentMessage =new PersistedMessage
@@ -89,6 +99,8 @@ app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueR
     
     await channel.Writer.WriteAsync(currentMessage.Id);
     logger.Information("Message published {info}", channel.Reader.Count);
+    metrics.MessageCreated(inputMessage.QueueId);
+    metrics.RecordPublishDuration(sw, inputMessage.QueueId);
     return Results.Ok();
 });
 
@@ -108,6 +120,7 @@ app.MapPost("/queue", async (string queueName, bool deathLetterEnable, IDocument
     using var session = store.OpenAsyncSession();
     await session.StoreAsync(newQueue);
     await session.SaveChangesAsync();
+
     
     queueRepository.CreateQueue(newQueue.Id);
 
@@ -115,7 +128,7 @@ app.MapPost("/queue", async (string queueName, bool deathLetterEnable, IDocument
 });
 
 
-app.MapDelete("/queue", async (string queueName, IDocumentStore store, QueueRepository queueRepository) =>
+app.MapDelete("/queue", async (string queueName, IDocumentStore store, QueueRepository queueRepository,QueueMetrics metrics) =>
 {
     using var session = store.OpenAsyncSession();
     var queue = await session.Query<Queue>().Where(x =>  x.Name == queueName).FirstOrDefaultAsync();
@@ -126,6 +139,7 @@ app.MapDelete("/queue", async (string queueName, IDocumentStore store, QueueRepo
     
     session.Delete(messages);
     await session.SaveChangesAsync();
+    metrics.MessagesDeleted(queue.Id, messages.Count);
     return Results.Ok();
 });
 
