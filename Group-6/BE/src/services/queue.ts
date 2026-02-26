@@ -7,6 +7,7 @@ import { ws } from "../server";
 
 export const MESSAGEQUEUE: string = "messageQueue";
 export const DEADLETTERQUEUE: string = "deadLetterQueue";
+export const SCHEDULEDQUEUE: string = "scheduledQueue";
 
 class QueueService extends EventEmitter{
     private readonly queue: MessageData[] = [];
@@ -39,6 +40,23 @@ class QueueService extends EventEmitter{
         this.notifyUpdate(this.eventMessage, dequeuedMessage!);
         return dequeuedMessage;
     }
+    public enqueueScheduled(message: MessageData) {
+        let low = 0
+        let high = this.queue.length
+        
+        while(low < high){
+            const mid = Math.floor((low + high) / 2)
+            if(this.queue[mid].schedule! < message.schedule!){
+                low = mid + 1
+            }else{
+                high = mid
+            }
+        }
+        
+        this.queue.splice(low, 0, message);
+        this.notifyUpdate(this.eventMessage, message)
+        this.emit(this.eventMessage, message);
+    }
 
     private notifyUpdate(messageType: string, message: MessageData) {
         const payload = JSON.stringify({
@@ -56,3 +74,4 @@ class QueueService extends EventEmitter{
 
 export const queueService = new QueueService(MESSAGEQUEUE, ws);
 export const deadLetterQueueService = new QueueService(DEADLETTERQUEUE, ws);
+export const scheduledQueueService = new QueueService(SCHEDULEDQUEUE, ws);
