@@ -91,5 +91,22 @@ public static class Conversors
             UpdatedAt =  DateTime.UtcNow
         };
     }
+    
+    public static FailedMessage ToFailed(this MinimalMessage message, int RetryCount = 0)
+    {
+        return new FailedMessage()
+        {
+            Id = message.Id,
+            PublicId =  message.PublicId,
+            DestinationUrl = message.DestinationUrl,
+            State = message.State,
+            ScheduledOn = message.ScheduledOn,
+            CallbackUrl = message.CallbackUrl,
+            CallerRequestId = message.CallerRequestId,
+            RetryCount = RetryCount,
+            CreatedAt =  message.CreatedAt,
+            UpdatedAt =  DateTime.UtcNow,
+        };
+    }
 
 }

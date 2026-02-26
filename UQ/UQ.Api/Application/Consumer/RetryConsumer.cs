@@ -8,7 +8,7 @@ namespace UQ.Api.Application.Consumer;
 public class RetryConsumer (IAppDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<Consumer> logger)
     : ConsumerBase, IRetryConsumer
 {
-    private const int MaxRetryCount = 5;
+    private const int MaxRetryCount = 3;
     public async Task ExecuteCall(MinimalMessageToRetryData data)
     {
         var message = await GetMessageFromData(dbContext, data);

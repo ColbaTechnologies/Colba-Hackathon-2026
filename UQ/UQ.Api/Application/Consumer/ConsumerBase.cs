@@ -31,7 +31,7 @@ public class ConsumerBase
     {
         dbContext.MinimalMessages.Remove(minimalMessage);
         var minimalToRetry = minimalMessage.ToRetry();
-        dbContext.FailedMessages.Add(minimalToRetry);
+        dbContext.FailedMessages.Add(minimalToRetry.ToFailed());
     }
     
     protected static void FromMinimalToRetry(IAppDbContext dbContext, MinimalMessage minimalMessage) 
@@ -44,6 +44,6 @@ public class ConsumerBase
     protected static void FromRetryToFailed(IAppDbContext dbContext, MinimalMessageToRetry minimalMessage) 
     {
         dbContext.MinimalMessagesToRetry.Remove(minimalMessage);
-        dbContext.FailedMessages.Add(minimalMessage);
+        dbContext.FailedMessages.Add(minimalMessage.ToFailed(minimalMessage.RetryCount));
     }
 }
