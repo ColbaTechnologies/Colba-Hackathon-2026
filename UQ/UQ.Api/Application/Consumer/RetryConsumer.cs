@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UQ.Api.Domain;
 using UQ.Api.Domain.Partial;
-using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Data;
 
 namespace UQ.Api.Application.Consumer;
 
@@ -18,7 +18,6 @@ public class RetryConsumer(IAppDbContext dbContext, IHttpClientFactory httpClien
         foreach (var header in message.Headers) client.DefaultRequestHeaders.Add(header.Key, header.Value);
 
         var minimalMessage = await dbContext.MinimalMessagesToRetry.FirstOrDefaultAsync(m => m.Id == data.Id);
-
         if (minimalMessage is null)
         {
             logger.LogWarning("Called consumer for non existing message with {DataId}", data.Id);
@@ -27,13 +26,11 @@ public class RetryConsumer(IAppDbContext dbContext, IHttpClientFactory httpClien
 
         try
         {
-            var response =
-                await client.PostAsync(data.DestinationUrl,
-                    new StringContent(message.Body));
+            var response = await client.PostAsync(data.DestinationUrl, new StringContent(message.Body));
 
             minimalMessage.State = response.IsSuccessStatusCode
                 ? MessageState.Sent
-                : minimalMessage.RetryCount > MaxRetryCount
+                : minimalMessage.RetryCount >= MaxRetryCount
                     ? MessageState.Failed
                     : MessageState.ToRetry;
 
@@ -49,7 +46,5 @@ public class RetryConsumer(IAppDbContext dbContext, IHttpClientFactory httpClien
 
         minimalMessage.UpdatedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
-
-        // TODO: callbacks
     }
 }

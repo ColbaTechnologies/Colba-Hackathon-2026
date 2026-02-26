@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UQ.Api.Domain;
 using UQ.Api.Domain.Partial;
-using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Data;
 using UQ.Api.Infrastructure.MessageModels;
 
 namespace UQ.Api.Application.Consumer;
@@ -26,6 +26,8 @@ public class ConsumerBase
 
         return message;
     }
+    
+    // TODO: add callbacks here
 
     protected static void FromMinimalToFailed(IAppDbContext dbContext, MinimalMessage minimalMessage)
     {
@@ -45,5 +47,11 @@ public class ConsumerBase
     {
         dbContext.MinimalMessagesToRetry.Remove(minimalMessage);
         dbContext.FailedMessages.Add(minimalMessage.ToFailed(minimalMessage.RetryCount));
+    }
+    
+    protected static void FromRetryToMinimal(IAppDbContext dbContext, MinimalMessageToRetry minimalMessage)
+    {
+        dbContext.MinimalMessagesToRetry.Remove(minimalMessage);
+        dbContext.MinimalMessages.Add(minimalMessage);
     }
 }

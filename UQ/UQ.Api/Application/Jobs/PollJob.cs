@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using UQ.Api.Application.Consumer;
 using UQ.Api.Domain;
-using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Data;
 
 namespace UQ.Api.Application.Jobs;
 

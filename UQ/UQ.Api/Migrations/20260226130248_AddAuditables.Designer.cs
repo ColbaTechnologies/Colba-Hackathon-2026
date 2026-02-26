@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Data;
 
 #nullable disable
 

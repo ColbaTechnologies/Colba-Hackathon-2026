@@ -1,14 +1,15 @@
 using UQ.Api.Domain;
 using UQ.Api.Domain.Dtos;
-using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Data;
+using UQ.Api.Presentation.Dtos;
 
 namespace UQ.Api.Application.Producer;
 
 public class Producer(IAppDbContext dbContext) : IProducer
 {
-    public async Task<SavePendingMessageResult> SavePendingMessage(InputEntry inputEntry)
+    public async Task<SavePendingMessageResult> SavePendingMessage(MessageInput messageInput)
     {
-        var message = new Message(inputEntry.ToMessageInput());
+        var message = new Message(messageInput.ToMessageInput());
 
         var (minimalMessage, messageBody, messageHeaders) = message.ToDatabaseMessage();
         await dbContext.MinimalMessages.AddAsync(minimalMessage);

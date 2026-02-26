@@ -1,16 +1,18 @@
 using UQ.Api.Domain;
 using UQ.Api.Domain.Partial;
 using UQ.Api.Infrastructure.MessageModels;
+using UQ.Api.Presentation.Dtos;
 
 namespace UQ.Api.Application;
 
 public static class Conversors
 {
-    public static CreateMessageInput ToMessageInput(this InputEntry input)
+    public static CreateMessageInput ToMessageInput(this MessageInput messageInput)
     {
-        return new CreateMessageInput(input.DestinationUri, input.Headers, input.Body, input.ScheduledOn,
-            input.CallbackUrl,
-            input.CallerRequestId);
+        return new CreateMessageInput(messageInput.DestinationUrl, messageInput.Headers, messageInput.Body,
+            messageInput.ScheduledOn,
+            messageInput.CallbackUrl,
+            messageInput.CallerRequestId);
     }
 
     public static (MinimalMessage, MessageBody, List<MessageHeader>) ToDatabaseMessage(this Message message)

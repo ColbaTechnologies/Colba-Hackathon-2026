@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using UQ.Api.Application.Consumer;
 using UQ.Api.Application.Producer;
 using UQ.Api.Application.Repositories;
-using UQ.Api.Infrastructure;
+using UQ.Api.Infrastructure.Data;
 using UQ.Api.Infrastructure.Quartz;
+using UQ.Api.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -4,7 +4,7 @@ using UQ.Api.Application.Repositories;
 namespace UQ.Api.Presentation;
 
 [ApiController]
-[Route("/api/v1/status")]
+[Route("/api/v1/requestStatus")]
 public class StatusController(IMessageRepository repository) : ControllerBase
 {
     [HttpGet]
