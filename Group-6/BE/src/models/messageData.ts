@@ -1,12 +1,18 @@
+import { UUID } from "node:crypto";
 import { StatusType } from "./statusType";
 
 export interface MessageData {
-    id: number;
+    id: UUID;
     url: string;
-    headers: string
+    headers: HeadersDictionary
     payload: string;
     schedule: Date;
     status: StatusType
     retries: number;
+    
 }
 export let messages: MessageData[] = [];
+
+interface HeadersDictionary {
+    [key: string]: string;
+}
