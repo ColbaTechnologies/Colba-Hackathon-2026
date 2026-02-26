@@ -1,13 +1,14 @@
 using UQ.Api.Domain;
+using UQ.Api.Domain.Partial;
 using UQ.Api.Infrastructure.MessageModels;
 
 namespace UQ.Api.Application;
 
 public static class Conversors
 {
-    public static MessageInput ToMessageInput(this InputEntry input)
+    public static CreateMessageInput ToMessageInput(this InputEntry input)
     {
-        return new MessageInput(input.DestinationUri, input.Headers, input.Body, input.ScheduledOn, input.CallbackUrl,
+        return new CreateMessageInput(input.DestinationUri, input.Headers, input.Body, input.ScheduledOn, input.CallbackUrl,
             input.CallerRequestId);
     }
 
@@ -20,6 +21,8 @@ public static class Conversors
             DestinationUrl = message.DestinationUrl,
             State = message.State,
             ScheduledOn = message.ScheduledOn?.UtcDateTime,
+            CreatedAt = message.CreatedAt.DateTime,
+            UpdatedAt = message.UpdatedAt.UtcDateTime,
             CallbackUrl = message.CallbackUrl,
             CallerRequestId = message.CallerRequestId
         };
@@ -40,4 +43,19 @@ public static class Conversors
         
         return (minimalMessage, messageBody, messageHeaders);
     }
+
+    public static MinimalMessageData ToData(this MinimalMessage message)
+    {
+        return new MinimalMessageData()
+        {
+            Id = message.Id,
+            PublicId =  message.PublicId,
+            DestinationUrl = message.DestinationUrl,
+            State = message.State,
+            ScheduledOn = message.ScheduledOn, // TODO: handle schedules
+            CallbackUrl = message.CallbackUrl,
+            CallerRequestId = message.CallerRequestId
+        };
+    }
+
 }

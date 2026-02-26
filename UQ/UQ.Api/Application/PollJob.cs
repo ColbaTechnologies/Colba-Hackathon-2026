@@ -1,11 +1,26 @@
+using Microsoft.EntityFrameworkCore;
 using Quartz;
+using UQ.Api.Domain;
+using UQ.Api.Infrastructure;
 
 namespace UQ.Api.Application;
 
-public class PollJob : IJob
+public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
 {
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
-        throw new NotImplementedException();
+        var requestsToSend = await dbContext.MinimalMessages
+            .Where(x => x.State == MessageState.Pending)
+            .ToListAsync();
+
+        // TODO: parallel
+        // TODO: consumer factory
+        foreach (var minimal in requestsToSend)
+        {
+            await consumer.ExecuteCall(minimal.ToData());
+            minimal.State = MessageState.Processing;
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 }

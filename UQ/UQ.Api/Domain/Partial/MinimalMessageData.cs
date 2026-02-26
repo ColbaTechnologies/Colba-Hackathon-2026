@@ -9,4 +9,6 @@ public class MinimalMessageData
     public DateTime? ScheduledOn { get; set; }
     public string? CallbackUrl { get; set; }
     public string? CallerRequestId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

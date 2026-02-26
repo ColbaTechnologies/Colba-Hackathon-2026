@@ -1,8 +1,28 @@
+using System.Diagnostics.Tracing;
+using UQ.Api.Domain.Partial;
+
 namespace UQ.Api.Domain;
 
 public class Message : IAuditable
 {
-    public Message(MessageInput input)
+    public Message(ExistingMessageInput input)
+    {
+        Id = input.Id;
+        PublicId = input.PublicId;
+        DestinationUrl = input.DestinationUrl;
+        Headers = input.Headers;
+        Body = input.Body;
+        State = input.State;
+        
+        ScheduledOn = input.ScheduledOn;
+        CallbackUrl = input.CallbackUrl;
+        CallerRequestId = input.CallerRequestId;
+        
+        CreatedAt = input.CreatedAt;
+        UpdatedAt = input.UpdatedAt;
+    }
+    
+    public Message(CreateMessageInput input)
     {
         Id = Guid.NewGuid().ToString();
         PublicId = Guid.NewGuid().ToString();
@@ -34,10 +54,24 @@ public class Message : IAuditable
     public DateTimeOffset UpdatedAt { get; set; }
 }
 
-public record MessageInput(
+public record CreateMessageInput(
     string DestinationUrl,
     Dictionary<string, string> Headers,
     string Body,
     DateTimeOffset? ScheduledOn = null,
     string? CallbackUrl = null,
     string? CallerRequestId = null);
+
+public record ExistingMessageInput(
+    string Id,
+    string PublicId,
+    string DestinationUrl,
+    Dictionary<string, string> Headers,
+    string Body,
+    MessageState State,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    DateTimeOffset? ScheduledOn = null,
+    string? CallbackUrl = null,
+    string? CallerRequestId = null);
+    
