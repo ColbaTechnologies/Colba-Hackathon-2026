@@ -1,0 +1,6 @@
+@Equipo1_QStash_Clone_HostAddress = http://localhost:5072
+
+GET {{Equipo1_QStash_Clone_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

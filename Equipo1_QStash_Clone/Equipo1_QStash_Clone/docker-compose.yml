@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./config/otel-collector.yaml:/etc/otel/config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - loki
+      - tempo
+      - mimir
+
+  mimir:
+    image: grafana/mimir:latest
+    container_name: mimir
+    command: -config.file=/etc/mimir/mimir.yml
+    volumes:
+      - ./config/mimir.yml:/etc/mimir/mimir.yml
+      - mimir_data:/data
+    ports:
+      - "9009:9009"
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: tempo
+    command: -config.file=/etc/tempo/config.yml
+    volumes:
+      - ./config/tempo.yml:/etc/tempo/config.yml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mimir
+      - loki
+      - tempo
+
+
+volumes:
+  mimir_data:
+  loki_data:
+  tempo_data:
+  phoenix_data:
