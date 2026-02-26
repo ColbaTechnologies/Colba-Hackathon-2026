@@ -1,14 +1,13 @@
 using UQ.Api.Domain;
+using UQ.Api.Domain.Dtos;
 using UQ.Api.Infrastructure;
 
 namespace UQ.Api.Application;
 
 public class Producer(IAppDbContext dbContext) : IProducer
 {
-    public async Task<bool> SavePendingMessage(InputEntry inputEntry)
+    public async Task<SavePendingMessageResult> SavePendingMessage(InputEntry inputEntry)
     {
-        // TODO: validations
-        
         var message = new Message(inputEntry.ToMessageInput());
 
         var (minimalMessage, messageBody, messageHeaders) = message.ToDatabaseMessage();
@@ -17,6 +16,6 @@ public class Producer(IAppDbContext dbContext) : IProducer
         await dbContext.MessageHeaders.AddRangeAsync(messageHeaders);
         await dbContext.SaveChangesAsync();
         
-        return true;
+        return new SavePendingMessageResult(true, message.PublicId);
     }
 }

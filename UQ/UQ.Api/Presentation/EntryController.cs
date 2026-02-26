@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using UQ.Api.Application;
 
@@ -11,15 +12,22 @@ public class EntryController(IProducer producer) : ControllerBase
     [Route("call")]
     public async Task<ActionResult<InitialCallResult>> Update([FromBody] InputEntry entry)
     {
-        // call producer
+        var valid = Uri.IsWellFormedUriString(entry.DestinationUri, UriKind.RelativeOrAbsolute);
+        if (!valid)
+        {
+            return BadRequest();
+        }
         
-        var ok = await producer.SavePendingMessage(entry);
-        // producer returns ok & public id of the request
+        var (ok, publicId) = await producer.SavePendingMessage(entry);
+
+        if (!ok)
+        {
+            return new InitialCallResult(HttpStatusCode.InternalServerError, string.Empty);
+        }
         
-        // return 200 & public id
-        var result = new InitialCallResult(Guid.NewGuid().ToString());
+        var result = new InitialCallResult(HttpStatusCode.OK, publicId);
         return result;
     }
 }
 
-public record InitialCallResult(string RequestPublicId);
+public record InitialCallResult(HttpStatusCode ResultCode, string RequestPublicId);
