@@ -1,6 +1,6 @@
 using UQ.Api.Domain.Dtos;
 
-namespace UQ.Api.Application;
+namespace UQ.Api.Application.Producer;
 
 public interface IProducer
 {

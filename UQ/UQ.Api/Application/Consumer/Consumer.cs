@@ -1,37 +1,22 @@
-using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using UQ.Api.Domain;
 using UQ.Api.Domain.Partial;
 using UQ.Api.Infrastructure;
 
-namespace UQ.Api.Application;
+namespace UQ.Api.Application.Consumer;
 
-public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<Consumer> logger) : IConsumer
+public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<Consumer> logger) : ConsumerBase, IConsumer
 {
     public async Task ExecuteCall(MinimalMessageData data)
     {
-        var headers = await dbContext.MessageHeaders.Where(x => x.MessageId == data.Id).ToListAsync();
-        var body = await dbContext.MessageBodies.FirstOrDefaultAsync(x => x.MessageId == data.Id);
-
-        var message = new Message(new ExistingMessageInput( 
-            data.Id,
-            data.PublicId,
-            data.DestinationUrl,
-            headers.ToDictionary(header => header.HeaderKey, header => header.HeaderValue),
-            body?.BodyValue ?? String.Empty,
-            data.State,
-            data.CreatedAt,
-            data.UpdatedAt
-            ));
+        var message = await GetMessageFromData(dbContext, data);
         
         var client = httpClientFactory.CreateClient();
-        foreach (var header in headers)
+        foreach (var header in message.Headers)
         {
-            client.DefaultRequestHeaders.Add(header.HeaderKey, header.HeaderValue);
+            client.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
-        
-        var response = await client.PostAsync(data.DestinationUrl, new StringContent(message.Body)); // TODO: fill with real content
-        
+
         var minimalMessage = await dbContext.MinimalMessages.FirstOrDefaultAsync(m => m.Id == data.Id);
 
         if (minimalMessage is null)
@@ -40,15 +25,26 @@ public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFact
             return;
         }
         
-        if (response.IsSuccessStatusCode)
+        try
         {
-            minimalMessage.State = MessageState.Sent;
-            return;
-        }
+            var response = await client.PostAsync(data.DestinationUrl, new StringContent(message.Body));
+            minimalMessage.State = response.IsSuccessStatusCode ? MessageState.Sent : MessageState.ToRetry;
         
-        minimalMessage.State = MessageState.Failed;
+            if (minimalMessage.State == MessageState.ToRetry)
+            {
+                FromMinimalToRetry(dbContext, minimalMessage);
+            }
+        }
+        catch (Exception e)
+        {
+            minimalMessage.State = MessageState.Failed; 
+            logger.LogError("Consumer failed");
+            FromMinimalToFailed(dbContext, minimalMessage);
+        }
 
+        minimalMessage.UpdatedAt = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync();
+        
         // TODO: callbacks
-        // TODO: retries
     }
 }

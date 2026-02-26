@@ -2,7 +2,7 @@ using UQ.Api.Domain;
 using UQ.Api.Domain.Dtos;
 using UQ.Api.Infrastructure;
 
-namespace UQ.Api.Application;
+namespace UQ.Api.Application.Producer;
 
 public class Producer(IAppDbContext dbContext) : IProducer
 {

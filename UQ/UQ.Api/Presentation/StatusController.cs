@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using UQ.Api.Application;
+using UQ.Api.Application.Repositories;
 
 namespace UQ.Api.Presentation;
 

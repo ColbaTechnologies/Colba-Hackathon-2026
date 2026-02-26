@@ -1,6 +1,6 @@
 using UQ.Api.Domain;
 
-namespace UQ.Api.Application;
+namespace UQ.Api.Application.Repositories;
 
 public interface IMessageRepository
 {

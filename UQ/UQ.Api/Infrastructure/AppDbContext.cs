@@ -11,6 +11,8 @@ public class AppDbContext : DbContext, IAppDbContext
     }
     
     public DbSet<MinimalMessage> MinimalMessages => Set<MinimalMessage>();
+    public DbSet<MinimalMessageToRetry> MinimalMessagesToRetry => Set<MinimalMessageToRetry>();
+    public DbSet<MinimalMessageToRetry> FailedMessages => Set<MinimalMessageToRetry>();
     public DbSet<MessageHeader> MessageHeaders => Set<MessageHeader>();
     public DbSet<MessageBody> MessageBodies => Set<MessageBody>();
     public Task<int> SaveChangesAsync()

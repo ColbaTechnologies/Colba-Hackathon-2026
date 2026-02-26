@@ -6,12 +6,12 @@ using UQ.Api.Infrastructure;
 
 namespace UQ.Api.Application.Jobs;
 
-public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
+public class RetryJob(IAppDbContext dbContext, IRetryConsumer consumer) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
-        var requestsToSend = await dbContext.MinimalMessages
-            .Where(x => x.State == MessageState.Pending)
+        var requestsToSend = await dbContext.MinimalMessagesToRetry
+            .Where(x => x.State == MessageState.ToRetry)
             .ToListAsync();
 
         // TODO: parallel
@@ -19,14 +19,15 @@ public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
         foreach (var minimal in requestsToSend)
         {
             minimal.State = MessageState.Processing;
+            minimal.RetryCount++;
             minimal.UpdatedAt = DateTime.UtcNow; 
         }
         
         await dbContext.SaveChangesAsync();
 
         foreach (var minimal in requestsToSend)
-        { 
-            await consumer.ExecuteCall(minimal.ToData());
+        {
+            await consumer.ExecuteCall(minimal.ToRetryData());
         }
     }
 }

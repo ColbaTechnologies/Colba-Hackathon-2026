@@ -57,5 +57,39 @@ public static class Conversors
             CallerRequestId = message.CallerRequestId
         };
     }
+    
+    public static MinimalMessageToRetryData ToRetryData(this MinimalMessageToRetry message)
+    {
+        return new MinimalMessageToRetryData()
+        {
+            Id = message.Id,
+            PublicId =  message.PublicId,
+            DestinationUrl = message.DestinationUrl,
+            State = message.State,
+            ScheduledOn = message.ScheduledOn, // TODO: handle schedules
+            CallbackUrl = message.CallbackUrl,
+            CallerRequestId = message.CallerRequestId,
+            RetryCount = message.RetryCount,
+            CreatedAt = message.CreatedAt,
+            UpdatedAt = message.UpdatedAt
+        };
+    }
+    
+    public static MinimalMessageToRetry ToRetry(this MinimalMessage message)
+    {
+        return new MinimalMessageToRetry()
+        {
+            Id = message.Id,
+            PublicId =  message.PublicId,
+            DestinationUrl = message.DestinationUrl,
+            State = message.State,
+            ScheduledOn = message.ScheduledOn,
+            CallbackUrl = message.CallbackUrl,
+            CallerRequestId = message.CallerRequestId,
+            RetryCount = 0,
+            CreatedAt =  message.CreatedAt,
+            UpdatedAt =  DateTime.UtcNow
+        };
+    }
 
 }

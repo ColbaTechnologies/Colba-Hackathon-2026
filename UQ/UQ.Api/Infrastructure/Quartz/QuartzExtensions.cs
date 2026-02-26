@@ -1,5 +1,6 @@
 using Quartz;
 using UQ.Api.Application;
+using UQ.Api.Application.Jobs;
 
 namespace UQ.Api.Infrastructure.Quartz;
 
@@ -7,16 +8,23 @@ public static class QuartzExtensions
 {
     public static void AddQuartzJobs(this IServiceCollection services, IConfiguration? configuration)
     {
-        var jobConfig = new PollJobConfig();
+        var pollConfig = new PollJobConfig();
+        var retryConfig = new RetryJobConfig();
 
         if (configuration is not null)
         {
-            configuration.Bind(nameof(PollJobConfig), jobConfig);
-            services.AddSingleton(jobConfig);
+            configuration.Bind(nameof(PollJobConfig), pollConfig);
+            services.AddSingleton(pollConfig);
+            configuration.Bind(nameof(RetryJobConfig), retryConfig);
+            services.AddSingleton(retryConfig);
         }
 
         services
-            .AddQuartz(quartz => { quartz.AddQuartzJobAtStartup<PollJob>(jobConfig); })
+            .AddQuartz(quartz =>
+            {
+                quartz.AddQuartzJobAtStartup<PollJob>(pollConfig);
+                quartz.AddQuartzJobAtStartup<RetryJob>(retryConfig);
+            })
             .AddQuartzHostedService(opts =>
                 opts.WaitForJobsToComplete = true);
     }

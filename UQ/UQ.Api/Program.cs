@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using UQ.Api.Application;
+using UQ.Api.Application.Consumer;
+using UQ.Api.Application.Producer;
+using UQ.Api.Application.Repositories;
 using UQ.Api.Infrastructure;
 using UQ.Api.Infrastructure.Quartz;
 
@@ -25,6 +28,7 @@ builder.Services.AddHttpClient();
 services.AddTransient<IProducer, Producer>();
 services.AddTransient<IProducer, Producer>();
 services.AddTransient<IConsumer, Consumer>();
+services.AddTransient<IRetryConsumer, RetryConsumer>();
 
 services.AddTransient<IMessageRepository, MessageRepository>();
 

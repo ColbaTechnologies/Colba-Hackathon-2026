@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using UQ.Api.Application;
+using UQ.Api.Application.Producer;
 
 namespace UQ.Api.Presentation;
 
