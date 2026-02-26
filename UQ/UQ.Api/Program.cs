@@ -22,6 +22,8 @@ services.AddTransient<DbContext, AppDbContext>();
 services.AddTransient<IAppDbContext, AppDbContext>();
 
 services.AddTransient<IProducer, Producer>();
+services.AddTransient<IProducer, Producer>();
+services.AddTransient<IConsumer, Consumer>();
 
 
 
