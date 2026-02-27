@@ -17,8 +17,8 @@ public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore sto
 
     public void CreateQueue(string queueId, bool fifo = true)
     {
-        _queue[queueId] = Channel.CreateUnbounded<string>();
-        var consumer = new Consumer(logger, _queue[queueId], store, metrics, fifo);
+        Queue[queueId] = Channel.CreateUnbounded<string>();
+        var consumer = new Consumer(logger, Queue[queueId], store, metrics, fifo);
         _ = Task.Run(async () => { await consumer.Start(queueId); });
         Consumer.Add(queueId, consumer);
         
