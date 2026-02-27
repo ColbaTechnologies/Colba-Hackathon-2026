@@ -654,10 +654,28 @@
           "Microsoft.AspNetCore.App"
         ]
       },
-      "OpenTelemetry.Instrumentation.Runtime/1.15.0": {
+      "OpenTelemetry.Instrumentation.Http/1.10.0": {
         "type": "package",
         "dependencies": {
-          "OpenTelemetry.Api": "[1.15.0, 2.0.0)"
+          "Microsoft.Extensions.Configuration": "9.0.0",
+          "Microsoft.Extensions.Options": "9.0.0",
+          "OpenTelemetry.Api.ProviderBuilderExtensions": "[1.10.0, 2.0.0)"
+        },
+        "compile": {
+          "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "OpenTelemetry.Instrumentation.Runtime/1.10.0": {
+        "type": "package",
+        "dependencies": {
+          "OpenTelemetry.Api": "[1.10.0, 2.0.0)"
         },
         "compile": {
           "lib/net8.0/OpenTelemetry.Instrumentation.Runtime.dll": {
@@ -2400,17 +2418,33 @@
         "opentelemetry.instrumentation.aspnetcore.nuspec"
       ]
     },
-    "OpenTelemetry.Instrumentation.Runtime/1.15.0": {
-      "sha512": "OOvpqR/j2Pb6+tWhHNODIbSJ53Or/MDtTiXEyrsWI02K2lLAgvBFcxUOrHggS/8015cYR3AdSaXv6NZrkz5yQA==",
+    "OpenTelemetry.Instrumentation.Http/1.10.0": {
+      "sha512": "W6NtQ4BSJgMlCKJB6tHD2Y4v5h+1N48qp9l+BGa35G3+qU2tlqgitxg6Ruu7ijKwDsc10UAAovU4lAVyQTJ/1Q==",
       "type": "package",
-      "path": "opentelemetry.instrumentation.runtime/1.15.0",
+      "path": "opentelemetry.instrumentation.http/1.10.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.TXT",
-        "README.md",
-        "lib/net10.0/OpenTelemetry.Instrumentation.Runtime.dll",
-        "lib/net10.0/OpenTelemetry.Instrumentation.Runtime.xml",
+        "lib/net462/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/net462/OpenTelemetry.Instrumentation.Http.xml",
+        "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/net8.0/OpenTelemetry.Instrumentation.Http.xml",
+        "lib/netstandard2.0/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/netstandard2.0/OpenTelemetry.Instrumentation.Http.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.instrumentation.http.1.10.0.nupkg.sha512",
+        "opentelemetry.instrumentation.http.nuspec"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Runtime/1.10.0": {
+      "sha512": "+IrgISnm2KxowLrCUheuQZP0r2t2XK8kkEJKpy3ZjAVN480qWXHmj5ZQJRhxDOYdIIgrZoL/7XaTO6CqtN7RMw==",
+      "type": "package",
+      "path": "opentelemetry.instrumentation.runtime/1.10.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
         "lib/net462/OpenTelemetry.Instrumentation.Runtime.dll",
         "lib/net462/OpenTelemetry.Instrumentation.Runtime.xml",
         "lib/net8.0/OpenTelemetry.Instrumentation.Runtime.dll",
@@ -2418,7 +2452,7 @@
         "lib/netstandard2.0/OpenTelemetry.Instrumentation.Runtime.dll",
         "lib/netstandard2.0/OpenTelemetry.Instrumentation.Runtime.xml",
         "opentelemetry-icon-color.png",
-        "opentelemetry.instrumentation.runtime.1.15.0.nupkg.sha512",
+        "opentelemetry.instrumentation.runtime.1.10.0.nupkg.sha512",
         "opentelemetry.instrumentation.runtime.nuspec"
       ]
     },
@@ -3062,7 +3096,8 @@
       "OpenTelemetry.Exporter.OpenTelemetryProtocol >= 1.15.0",
       "OpenTelemetry.Extensions.Hosting >= 1.15.0",
       "OpenTelemetry.Instrumentation.AspNetCore >= 1.15.0",
-      "OpenTelemetry.Instrumentation.Runtime >= 1.15.0",
+      "OpenTelemetry.Instrumentation.Http >= 1.10.0",
+      "OpenTelemetry.Instrumentation.Runtime >= 1.10.0",
       "Polly >= 8.6.5",
       "RavenDB.Client >= 7.2.0",
       "Serilog.AspNetCore >= 10.0.0",
@@ -3133,9 +3168,13 @@
             "target": "Package",
             "version": "[1.15.0, )"
           },
+          "OpenTelemetry.Instrumentation.Http": {
+            "target": "Package",
+            "version": "[1.10.0, )"
+          },
           "OpenTelemetry.Instrumentation.Runtime": {
             "target": "Package",
-            "version": "[1.15.0, )"
+            "version": "[1.10.0, )"
           },
           "Polly": {
             "target": "Package",
@@ -3180,5 +3219,43 @@
         "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.405/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json."
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json."
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json."
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json."
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json."
+    },
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json."
+    }
+  ]
 }

@@ -91,3 +91,5 @@
 /Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Grpc.Net.Client.dll
 /Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Grpc.Net.Common.dll
 /Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/Serilog.Sinks.OpenTelemetry.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/OpenTelemetry.Instrumentation.Http.dll
+/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/bin/Debug/net8.0/config/dashboard.json

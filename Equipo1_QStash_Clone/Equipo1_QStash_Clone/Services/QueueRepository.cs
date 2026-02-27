@@ -7,12 +7,12 @@ namespace Equipo1_QStash_Clone.Services;
 
 public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore store, QueueMetrics metrics)
 {
-    private static Dictionary<string, Channel<string>>  _queue = new();
-    private static Dictionary<string, Consumer >  _consummer = new();
+    private static readonly Dictionary<string, Channel<string>>  Queue = new();
+    private static readonly Dictionary<string, Consumer >  Consumer = new();
 
     public Channel<string> GetChannelQueue(string queueId)
     {
-        return _queue[queueId];
+        return Queue[queueId];
     }
 
     public void CreateQueue(string queueId, bool fifo = true)
@@ -20,14 +20,18 @@ public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore sto
         _queue[queueId] = Channel.CreateUnbounded<string>();
         var consumer = new Consumer(logger, _queue[queueId], store, metrics, fifo);
         _ = Task.Run(async () => { await consumer.Start(queueId); });
-        _consummer.Add(queueId, consumer);
+        Consumer.Add(queueId, consumer);
         
-        var session = store.OpenSession();   
-        var messages = session.Query<PersistedMessage>().Where(x=> x.QueueId == queueId).ToList();
+        var session = store.OpenSession();
+        var messages = session.
+            Query<PersistedMessage>()
+            .Where(x=> x.QueueId == queueId)
+            .OrderByDescending(x=> x.Timestamp)
+            .ToList();
           
         foreach (var message in messages)
         {
-            _queue[queueId].Writer.TryWrite(message.Id); 
+            Queue[queueId].Writer.TryWrite(message.Id); 
             logger.LogInformation("Publishing pending messages to queue {queueId}", queueId);
         }
         logger.LogInformation("Queue {QueueId} created", queueId);
@@ -35,8 +39,8 @@ public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore sto
 
     public void DeleteQueue(string queueId)
     {
-        _consummer[queueId].Stop();
-        _consummer.Remove(queueId);
+        Consumer[queueId].Stop();
+        Consumer.Remove(queueId);
     }
     
     public int DeleteMessages(string queueId)

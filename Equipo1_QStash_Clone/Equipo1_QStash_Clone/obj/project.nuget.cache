@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "14PPrlzp6bw=",
+  "dgSpecHash": "3mNhqkV7aG8=",
   "success": true,
   "projectFilePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
   "expectedPackageFiles": [
@@ -42,7 +42,8 @@
     "/Users/salva/.nuget/packages/opentelemetry.exporter.opentelemetryprotocol/1.15.0/opentelemetry.exporter.opentelemetryprotocol.1.15.0.nupkg.sha512",
     "/Users/salva/.nuget/packages/opentelemetry.extensions.hosting/1.15.0/opentelemetry.extensions.hosting.1.15.0.nupkg.sha512",
     "/Users/salva/.nuget/packages/opentelemetry.instrumentation.aspnetcore/1.15.0/opentelemetry.instrumentation.aspnetcore.1.15.0.nupkg.sha512",
-    "/Users/salva/.nuget/packages/opentelemetry.instrumentation.runtime/1.15.0/opentelemetry.instrumentation.runtime.1.15.0.nupkg.sha512",
+    "/Users/salva/.nuget/packages/opentelemetry.instrumentation.http/1.10.0/opentelemetry.instrumentation.http.1.10.0.nupkg.sha512",
+    "/Users/salva/.nuget/packages/opentelemetry.instrumentation.runtime/1.10.0/opentelemetry.instrumentation.runtime.1.10.0.nupkg.sha512",
     "/Users/salva/.nuget/packages/polly/8.6.5/polly.8.6.5.nupkg.sha512",
     "/Users/salva/.nuget/packages/polly.core/8.6.5/polly.core.8.6.5.nupkg.sha512",
     "/Users/salva/.nuget/packages/ravendb.client/7.2.0/ravendb.client.7.2.0.nupkg.sha512",
@@ -66,5 +67,60 @@
     "/Users/salva/.nuget/packages/system.text.encodings.web/10.0.0/system.text.encodings.web.10.0.0.nupkg.sha512",
     "/Users/salva/.nuget/packages/system.text.json/10.0.0/system.text.json.10.0.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json.",
+      "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json.",
+      "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json.",
+      "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json.",
+      "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1801",
+      "level": "Warning",
+      "message": "Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json.",
+      "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "targetGraphs": []
+    },
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://pkgs.dev.azure.com/biketec/FIT-Cloud/_packaging/fit-core/nuget/v3/index.json.",
+      "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+      "targetGraphs": []
+    }
+  ]
 }

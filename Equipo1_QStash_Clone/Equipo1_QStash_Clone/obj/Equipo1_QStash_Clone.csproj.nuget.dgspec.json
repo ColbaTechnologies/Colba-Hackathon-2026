@@ -64,9 +64,13 @@
               "target": "Package",
               "version": "[1.15.0, )"
             },
+            "OpenTelemetry.Instrumentation.Http": {
+              "target": "Package",
+              "version": "[1.10.0, )"
+            },
             "OpenTelemetry.Instrumentation.Runtime": {
               "target": "Package",
-              "version": "[1.15.0, )"
+              "version": "[1.10.0, )"
             },
             "Polly": {
               "target": "Package",

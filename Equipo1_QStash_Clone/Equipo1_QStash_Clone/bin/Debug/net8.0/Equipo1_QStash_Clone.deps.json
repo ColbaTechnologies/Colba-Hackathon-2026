@@ -13,7 +13,8 @@
           "OpenTelemetry.Exporter.OpenTelemetryProtocol": "1.15.0",
           "OpenTelemetry.Extensions.Hosting": "1.15.0",
           "OpenTelemetry.Instrumentation.AspNetCore": "1.15.0",
-          "OpenTelemetry.Instrumentation.Runtime": "1.15.0",
+          "OpenTelemetry.Instrumentation.Http": "1.10.0",
+          "OpenTelemetry.Instrumentation.Runtime": "1.10.0",
           "Polly": "8.6.5",
           "RavenDB.Client": "7.2.0",
           "Serilog.AspNetCore": "10.0.0",
@@ -415,14 +416,27 @@
           }
         }
       },
-      "OpenTelemetry.Instrumentation.Runtime/1.15.0": {
+      "OpenTelemetry.Instrumentation.Http/1.10.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0",
+          "OpenTelemetry.Api.ProviderBuilderExtensions": "1.15.0"
+        },
+        "runtime": {
+          "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll": {
+            "assemblyVersion": "1.10.0.248",
+            "fileVersion": "1.10.0.248"
+          }
+        }
+      },
+      "OpenTelemetry.Instrumentation.Runtime/1.10.0": {
         "dependencies": {
           "OpenTelemetry.Api": "1.15.0"
         },
         "runtime": {
           "lib/net8.0/OpenTelemetry.Instrumentation.Runtime.dll": {
-            "assemblyVersion": "1.15.0.899",
-            "fileVersion": "1.15.0.899"
+            "assemblyVersion": "1.10.0.257",
+            "fileVersion": "1.10.0.257"
           }
         }
       },
@@ -980,12 +994,19 @@
       "path": "opentelemetry.instrumentation.aspnetcore/1.15.0",
       "hashPath": "opentelemetry.instrumentation.aspnetcore.1.15.0.nupkg.sha512"
     },
-    "OpenTelemetry.Instrumentation.Runtime/1.15.0": {
+    "OpenTelemetry.Instrumentation.Http/1.10.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-OOvpqR/j2Pb6+tWhHNODIbSJ53Or/MDtTiXEyrsWI02K2lLAgvBFcxUOrHggS/8015cYR3AdSaXv6NZrkz5yQA==",
-      "path": "opentelemetry.instrumentation.runtime/1.15.0",
-      "hashPath": "opentelemetry.instrumentation.runtime.1.15.0.nupkg.sha512"
+      "sha512": "sha512-W6NtQ4BSJgMlCKJB6tHD2Y4v5h+1N48qp9l+BGa35G3+qU2tlqgitxg6Ruu7ijKwDsc10UAAovU4lAVyQTJ/1Q==",
+      "path": "opentelemetry.instrumentation.http/1.10.0",
+      "hashPath": "opentelemetry.instrumentation.http.1.10.0.nupkg.sha512"
+    },
+    "OpenTelemetry.Instrumentation.Runtime/1.10.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+IrgISnm2KxowLrCUheuQZP0r2t2XK8kkEJKpy3ZjAVN480qWXHmj5ZQJRhxDOYdIIgrZoL/7XaTO6CqtN7RMw==",
+      "path": "opentelemetry.instrumentation.runtime/1.10.0",
+      "hashPath": "opentelemetry.instrumentation.runtime.1.10.0.nupkg.sha512"
     },
     "Polly/8.6.5": {
       "type": "package",
