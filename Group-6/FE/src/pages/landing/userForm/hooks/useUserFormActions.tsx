@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { createSdk } from "@/lib/sdk";
-
-export interface UserFormValues {
-    url: string;
-    payload: string;
-    apiKey: string;
-    isScheduled: "yes" | "no";
-    scheduledTime: string;
-}
+import type { UserFormValues } from "@/dto/userFormValues";
 
 const initialValues: UserFormValues = {
     url: "",
@@ -72,6 +65,7 @@ export function useUserFormActions() {
             url: values.url,
             payload: values.payload,
             headers: { "Content-Type": "application/json" },
+            retries: 0,
             ...(values.isScheduled === "yes" && values.scheduledTime
                 ? { schedule: new Date(values.scheduledTime) }
                 : {}),

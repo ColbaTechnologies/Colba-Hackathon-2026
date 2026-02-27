@@ -17,6 +17,7 @@ export interface SendMessageInput {
   url: string
   headers: Record<string, string>
   payload: string
+  retries: number
   schedule?: Date
 }
 
