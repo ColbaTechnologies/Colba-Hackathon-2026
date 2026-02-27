@@ -171,6 +171,12 @@ export default function Backoffice() {
                 )}
 
                 <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-mono tracking-tight text-green-500">Message Queue</h2>
+                        <p className="text-sm text-muted-foreground font-mono">
+                            {messages.length} message{messages.length !== 1 ? "s" : ""} in queue
+                        </p>
+                    </div>
                     {messages.map((msg) => (
                         <MessageCard key={msg.id} msg={msg} isNew={newIds.has(msg.id)} />
                     ))}
