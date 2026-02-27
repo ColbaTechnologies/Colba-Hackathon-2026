@@ -10,5 +10,5 @@ export async function checkScheduledMessages() {
         if (message && message.schedule <= now) {
             processMessage(message, scheduledQueueService)
         }
-    }, 500000)
+    }, 60000)
 }
