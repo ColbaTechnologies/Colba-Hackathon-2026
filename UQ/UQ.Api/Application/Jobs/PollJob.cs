@@ -12,6 +12,7 @@ public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
     {
         var requestsToSend = await dbContext.MinimalMessages
             .Where(x => x.State == MessageState.Pending)
+            .OrderBy(x => x.CreatedAt)
             .ToListAsync();
 
         // TODO: parallel

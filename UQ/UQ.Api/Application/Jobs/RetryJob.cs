@@ -12,6 +12,7 @@ public class RetryJob(IAppDbContext dbContext, IRetryConsumer consumer) : IJob
     {
         var requestsToSend = await dbContext.MinimalMessagesToRetry
             .Where(x => x.State == MessageState.ToRetry)
+            .OrderBy(x => x.CreatedAt)
             .ToListAsync();
 
         // TODO: parallel
