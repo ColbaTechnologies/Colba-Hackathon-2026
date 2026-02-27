@@ -6,12 +6,12 @@ export interface MessageData {
     url: string;
     headers: HeadersDictionary
     payload: string;
-    schedule: Date;
+    schedule: Date | null;
     status: StatusType
     retries: number;
     createdAt: Date;
-    
 }
+
 export let messages: MessageData[] = [];
 
 interface HeadersDictionary {

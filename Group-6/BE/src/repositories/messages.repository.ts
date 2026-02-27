@@ -16,7 +16,7 @@ export const saveMessage = async (message: MessageDto): Promise<MessageData> => 
         status: StatusType.PENDING
     }
     const session = store.openSession();
-    await session.store(message);
+    await session.store(message, "MessageDatas/");
     await session.saveChanges();
     
     return messageData;
@@ -24,7 +24,7 @@ export const saveMessage = async (message: MessageDto): Promise<MessageData> => 
 
 export const fetchMessages = async (): Promise<MessageData[]> => {
     const session = store.openSession();
-    const messages = await session.query<MessageData>({ collection: "Messages" }).all();
+    const messages = await session.query<MessageData>({ collection: "MessageDatas" }).all();
     return messages;
 }
 
