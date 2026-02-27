@@ -6,7 +6,7 @@ using UQ.Api.Infrastructure.Data;
 
 namespace UQ.Api.Application.Jobs;
 
-public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
+public class PollJob(IAppDbContext dbContext, IConsumerFactory consumerFactory) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
@@ -16,7 +16,6 @@ public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
             .ToListAsync();
 
         // TODO: parallel
-        // TODO: consumer factory
         foreach (var minimal in requestsToSend)
         {
             minimal.State = MessageState.Processing;
@@ -25,6 +24,6 @@ public class PollJob(IAppDbContext dbContext, IConsumer consumer) : IJob
 
         await dbContext.SaveChangesAsync();
 
-        foreach (var minimal in requestsToSend) await consumer.ExecuteCall(minimal.ToData());
+        foreach (var minimal in requestsToSend) await consumerFactory.GetConsumer().ExecuteCall(minimal.ToData());
     }
 }

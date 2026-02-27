@@ -6,7 +6,7 @@ using UQ.Api.Infrastructure.Data;
 
 namespace UQ.Api.Application.Jobs;
 
-public class RetryJob(IAppDbContext dbContext, IRetryConsumer consumer) : IJob
+public class RetryJob(IAppDbContext dbContext, IConsumerFactory consumerFactory) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
@@ -16,7 +16,6 @@ public class RetryJob(IAppDbContext dbContext, IRetryConsumer consumer) : IJob
             .ToListAsync();
 
         // TODO: parallel
-        // TODO: consumer factory
         foreach (var minimal in requestsToSend)
         {
             minimal.State = MessageState.Processing;
@@ -26,6 +25,6 @@ public class RetryJob(IAppDbContext dbContext, IRetryConsumer consumer) : IJob
 
         await dbContext.SaveChangesAsync();
 
-        foreach (var minimal in requestsToSend) await consumer.ExecuteCall(minimal.ToRetryData());
+        foreach (var minimal in requestsToSend) await consumerFactory.GetRetryConsumer().ExecuteCall(minimal.ToRetryData());
     }
 }
