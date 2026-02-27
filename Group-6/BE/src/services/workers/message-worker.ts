@@ -5,7 +5,7 @@ import PQueue from 'p-queue';
 import { updateMessageStatus } from '../../repositories/messages.repository';
 import { StatusType } from '../../models/statusType';
 
-const workerQueue = new PQueue({ concurrency: 100 });
+const workerQueue = new PQueue({ concurrency: 10 });
 
 export const initWorker = () => {
     console.log("Worker listening...");
