@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { MessageData } from '../../models/messageData';
-import { deadLetterQueueService, MESSAGEQUEUE, queueService } from '../queue';
+import { deadLetterQueueService, MESSAGEQUEUE, QueueService, queueService } from '../queue';
 import PQueue from 'p-queue';
 import { updateMessageStatus } from '../../repositories/messages.repository';
 import { StatusType } from '../../models/statusType';
@@ -14,7 +14,7 @@ export const initWorker = () => {
         console.log(`New message detected: ${message.id}`);
         workerQueue.add(async () => {
             try {
-                await processMessage(message);
+                await processMessage(message, queueService);
             } catch (error) {
                 deadLetterQueueService.enqueue({ ...message, status: StatusType.FAILED });
             }
@@ -22,7 +22,7 @@ export const initWorker = () => {
     });
 };
 
-async function processMessage(message: MessageData, retryNumber: number = 1) {
+export async function processMessage(message: MessageData, queueService: QueueService, retryNumber: number = 1) {
     console.log(`Processing message:`, message.payload);
 
     const config: AxiosRequestConfig = {
@@ -55,6 +55,6 @@ async function processMessage(message: MessageData, retryNumber: number = 1) {
             throw error;
         }
 
-        await processMessage(message, ++retryNumber);
+        await processMessage(message, queueService, ++retryNumber);
     }
 }

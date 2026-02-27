@@ -8,7 +8,7 @@ export const MESSAGEQUEUE: string = "messageQueue";
 export const DEADLETTERQUEUE: string = "deadLetterQueue";
 export const SCHEDULEDQUEUE: string = "scheduledQueue";
 
-class QueueService extends EventEmitter {
+export class QueueService extends EventEmitter {
     private readonly queue: MessageData[] = [];
 
     constructor(private eventMessage: string,

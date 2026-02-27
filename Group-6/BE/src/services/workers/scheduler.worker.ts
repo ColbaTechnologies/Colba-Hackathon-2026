@@ -1,20 +1,14 @@
 import store from "../../config/database"
 import { MessageData } from "../../models/messageData"
-import { queueService } from "../queue"
+import { queueService, scheduledQueueService } from "../queue"
+import { processMessage } from "./message-worker"
 
 export async function checkScheduledMessages() {
     setInterval(async () => {
         const now = new Date()
-
-        const session = store.openSession()
-        const messages = await session
-            .query<MessageData>({ collection: "Messages" })
-            .whereEquals("status", "PENDING")
-            .whereLessThanOrEqual("schedule", now)
-            .all()
-
-        for (const message of messages) {
-            queueService.enqueue(message)
+        const message: MessageData = scheduledQueueService.peek() as MessageData
+        if (message && message.schedule <= now) {
+            processMessage(message, scheduledQueueService)
         }
-    }, 5000)
+    }, 500000)
 }
