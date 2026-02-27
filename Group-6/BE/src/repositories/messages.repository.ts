@@ -9,16 +9,16 @@ export const saveMessage = async (message: MessageDto): Promise<MessageData> => 
         id: randomUUID(),
         url: message.url,
         headers: message.headers,
-        payload: message.url,
+        payload: message.payload,
         schedule: message.schedule,
         retries: message.retries,
         createdAt: new Date(),
         status: StatusType.PENDING
     }
     const session = store.openSession();
-    await session.store(message, "MessageDatas/");
+    await session.store(messageData, "MessageDatas/");
     await session.saveChanges();
-    
+
     return messageData;
 }
 

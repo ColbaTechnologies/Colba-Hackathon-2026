@@ -24,7 +24,8 @@ export function useUserFormActions() {
         setValues((prev) => ({
             ...prev,
             [name]: value,
-            ...(name === "isScheduled" && value === "no" ? { scheduledTime: "" } : {}),
+
+            ...(name === "isScheduled" && value === "no" ? null : {}),
         }));
         setErrors((prev) => ({ ...prev, [name]: undefined }));
     }

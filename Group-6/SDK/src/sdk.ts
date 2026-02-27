@@ -1,4 +1,4 @@
-import { Message, SendMessageInput, SDKConfig } from "./types/types"
+import type { Message, SDKConfig, SendMessageInput } from "./types/types"
 
 export class MessagingSDK {
     private baseUrl: string
@@ -27,12 +27,12 @@ export class MessagingSDK {
     }
 
     async getMessages(): Promise<Message[]> {
-    const data = await this.request<any[]>("/messages", {
-      method: "GET"
-    })
+        const data = await this.request<any[]>("/messages", {
+            method: "GET"
+        })
 
-    return data.map(this.mapMessage)
-  }
+        return data.map(this.mapMessage)
+    }
 
     async sendMessage(input: SendMessageInput): Promise<Message> {
         const body = {

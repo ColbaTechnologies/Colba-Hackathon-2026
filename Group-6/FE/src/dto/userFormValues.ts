@@ -3,7 +3,7 @@ type UserFormValues = {
     payload: string;
     apiKey: string;
     isScheduled: "yes" | "no";
-    scheduledTime: string;
+    scheduledTime: string | null;
 };
 
 export type { UserFormValues };

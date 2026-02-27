@@ -8,7 +8,7 @@ export async function checkScheduledMessages() {
         const now = new Date()
         const message: MessageData = scheduledQueueService.peek() as MessageData
         if (!message) return
-        const scheduleDate = new Date(message.schedule)
+        const scheduleDate = new Date(message!.schedule!)
         console.log(scheduleDate, now)
         if (scheduleDate <= now) {
             processMessage(message, scheduledQueueService)
