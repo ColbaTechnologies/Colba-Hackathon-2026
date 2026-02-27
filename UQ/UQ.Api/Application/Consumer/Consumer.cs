@@ -5,15 +5,14 @@ using UQ.Api.Infrastructure.Data;
 
 namespace UQ.Api.Application.Consumer;
 
-public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<Consumer> logger)
+public class Consumer(IAppDbContext dbContext, HttpClient httpClient, ILogger<Consumer> logger)
     : ConsumerBase, IConsumer
 {
     public async Task ExecuteCall(MinimalMessageData data)
     {
         var message = await GetMessageFromData(dbContext, data);
 
-        var client = httpClientFactory.CreateClient();
-        foreach (var header in message.Headers) client.DefaultRequestHeaders.Add(header.Key, header.Value);
+        foreach (var header in message.Headers) httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
 
         var minimalMessage = await dbContext.MinimalMessages.FirstOrDefaultAsync(m => m.Id == data.Id);
         if (minimalMessage is null)
@@ -24,12 +23,12 @@ public class Consumer(IAppDbContext dbContext, IHttpClientFactory httpClientFact
 
         try
         {
-            var response = await client.PostAsync(data.DestinationUrl, new StringContent(message.Body));
+            var response = await httpClient.PostAsync(data.DestinationUrl, new StringContent(message.Body));
             minimalMessage.State = response.IsSuccessStatusCode ? MessageState.Sent : MessageState.ToRetry;
 
             if (minimalMessage.State == MessageState.ToRetry) FromMinimalToRetry(dbContext, minimalMessage);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             minimalMessage.State = MessageState.Failed;
             logger.LogError("Consumer failed");

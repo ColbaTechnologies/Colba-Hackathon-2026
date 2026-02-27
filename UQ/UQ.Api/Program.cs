@@ -26,6 +26,7 @@ services.AddTransient<IProducer, Producer>();
 services.AddTransient<IProducer, Producer>();
 services.AddTransient<IConsumer, Consumer>();
 services.AddTransient<IRetryConsumer, RetryConsumer>();
+services.AddTransient<IConsumerFactory, ConsumerFactory>();
 
 services.AddTransient<IMessageRepository, MessageRepository>();
 
