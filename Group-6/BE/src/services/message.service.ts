@@ -9,7 +9,7 @@ export const getMessages = async () => {
 }
 
 export const createMessage = async (messageData:  Omit<MessageData, "id" | "status" | "retries"> , apiKey: string) => {
-    const expectedKey = "123456789"
+    const expectedKey = "111"
 
     validateApiKey(apiKey, expectedKey)
 
