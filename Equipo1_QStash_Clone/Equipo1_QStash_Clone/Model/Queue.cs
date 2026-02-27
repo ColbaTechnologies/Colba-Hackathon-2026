@@ -8,4 +8,6 @@ public class Queue
     public string? DeathLetterQueueId { get; set; }
     
     public string? DeathLetterQueueName { get; set; } 
+    
+    public bool Fifo { get; set; } = true;
 }

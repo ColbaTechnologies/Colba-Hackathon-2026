@@ -15,10 +15,10 @@ public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore sto
         return _queue[queueId];
     }
 
-    public void CreateQueue(string queueId)
+    public void CreateQueue(string queueId, bool fifo = true)
     {
         _queue[queueId] = Channel.CreateUnbounded<string>();
-        var consumer = new Consumer(logger, _queue[queueId], store, metrics);
+        var consumer = new Consumer(logger, _queue[queueId], store, metrics, fifo);
         _ = Task.Run(async () => { await consumer.Start(queueId); });
         _consummer.Add(queueId, consumer);
         

@@ -6,7 +6,7 @@ using Raven.Client.Documents;
 
 namespace Equipo1_QStash_Clone.Services;
 
-public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore store, QueueMetrics metrics)
+public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore store, QueueMetrics metrics, bool fifo)
 {
 
     private readonly HttpClient _httpClient = new();
@@ -20,61 +20,74 @@ public class Consumer(ILogger logger, Channel<string> channel, IDocumentStore st
         {
             while(channel.Reader.TryRead(out var messageId) && !_kill)
             {
-                using var session = store.OpenAsyncSession();
-                try
+                var message = messageId;
+                if (fifo)
                 {
-                    var message = await session.LoadAsync<PersistedMessage>(messageId);
-                    
-                    logger.LogInformation("Received message to {queueId}: {MessageId}",queueId, message.Id);
-                    
-                    var retryPolicy =
-                        Policy<HttpResponseMessage>
-                            .Handle<HttpRequestException>()
-                            .OrResult(r => !r.IsSuccessStatusCode)
-                            .WaitAndRetryAsync(
-                                message.InputMessage.Retries,
-                                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
-                            );
-                    
-                    logger.LogInformation("Send message: {MessageId} {Retry}", message.Id, message.InputMessage.Retries);
-
-                    var sw = Stopwatch.StartNew();
-                    var response = await retryPolicy.ExecuteAsync(() =>
-                        _httpClient.SendAsync(CreateHttpRequestMessage(message))
-                    );
-                    metrics.RecordDeliveryDuration(sw, queueId);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        metrics.MessageDelivered(queueId);
-                    }
-                    else
-                    {
-                        metrics.MessageDeliveryFailed(queueId);
-
-                        await session.StoreAsync(new ErrorMessage
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            Error = response.ReasonPhrase,
-                            PersistedMessage = message
-                        });
-
-                        metrics.DeadLetterMessage(queueId);
-                    }
-
-                    session.Delete(message);
+                    await ProcessMessageDelivery(queueId, message);
                 }
-                catch (Exception e)
+                else
                 {
-                    //TODO Save message on unmanange exception 
-                    Console.WriteLine(e);
-                    throw;
-                }
-                finally
-                {
-                    await session.SaveChangesAsync();
+                    _ = Task.Run(async () => { await ProcessMessageDelivery(queueId, message);});
                 }
             }
+        }
+    }
+
+    private async Task ProcessMessageDelivery(string queueId, string messageId)
+    {
+        using var session = store.OpenAsyncSession();
+        try
+        {
+            var message = await session.LoadAsync<PersistedMessage>(messageId);
+                    
+            logger.LogInformation("Received message to {queueId}: {MessageId}",queueId, message.Id);
+            
+            var retryPolicy =
+                Policy<HttpResponseMessage>
+                    .Handle<HttpRequestException>()
+                    .OrResult(r => !r.IsSuccessStatusCode)
+                    .WaitAndRetryAsync(
+                        message.InputMessage.Retries,
+                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
+                    );
+                    
+            logger.LogInformation("Send message: {MessageId} {Retry}", message.Id, message.InputMessage.Retries);
+
+            var sw = Stopwatch.StartNew();
+            var response = await retryPolicy.ExecuteAsync(() =>
+                _httpClient.SendAsync(CreateHttpRequestMessage(message))
+            );
+            metrics.RecordDeliveryDuration(sw, queueId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                metrics.MessageDelivered(queueId);
+            }
+            else
+            {
+                metrics.MessageDeliveryFailed(queueId);
+
+                await session.StoreAsync(new ErrorMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Error = response.ReasonPhrase,
+                    PersistedMessage = message
+                });
+
+                metrics.DeadLetterMessage(queueId);
+            }
+
+            session.Delete(message);
+        }
+        catch (Exception e)
+        {
+            //TODO Save message on unmanange exception 
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            await session.SaveChangesAsync();
         }
     }
 

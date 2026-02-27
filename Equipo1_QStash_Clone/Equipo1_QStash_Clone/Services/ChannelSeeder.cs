@@ -13,7 +13,7 @@ public class ChannelSeeder(QueueRepository queueRepository, IDocumentStore store
         var queues = session.Query<Queue>().ToList();
         foreach (var queue in queues)
         {
-            queueRepository.CreateQueue(queue.Id);
+            queueRepository.CreateQueue(queue.Id, queue.Fifo);
           
         }
         
