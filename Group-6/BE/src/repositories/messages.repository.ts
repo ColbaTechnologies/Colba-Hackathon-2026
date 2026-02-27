@@ -1,15 +1,25 @@
+import { randomUUID } from "crypto";
 import store from "../config/database";
-import { MessageData, messages } from "../models/messageData";
+import { MessageData, MessageDto, messages } from "../models/messageData";
 import { StatusType } from "../models/statusType";
 import { queueService, scheduledQueueService } from "../services/queue";
 
-export const saveMessage = async (message: MessageData): Promise<MessageData> => {
+export const saveMessage = async (message: MessageDto): Promise<MessageData> => {
+    let messageData: MessageData = {
+        id: randomUUID(),
+        url: message.url,
+        headers: message.headers,
+        payload: message.url,
+        schedule: message.schedule,
+        retries: message.retries,
+        createdAt: new Date(),
+        status: StatusType.PENDING
+    }
     const session = store.openSession();
-
     await session.store(message);
     await session.saveChanges();
     
-    return message;
+    return messageData;
 }
 
 export const fetchMessages = async (): Promise<MessageData[]> => {
