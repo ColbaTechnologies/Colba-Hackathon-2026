@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type Dispatch, type SetStateAction, type MutableRefObject } from "react";
 import type { Message } from "sdk";
 import Header from "@/components/ui/header";
 import MessageCard from "./components/messageCard";
@@ -18,20 +18,44 @@ const SLIDE_STYLE = `
 }
 `;
 
+function isScheduledPending(m: Message): boolean {
+    return m.status === "PENDING" && m.schedule > new Date();
+}
+
+function flashId(
+    id: string,
+    setter: Dispatch<SetStateAction<Set<string>>>,
+    timerRef: MutableRefObject<ReturnType<typeof setTimeout> | null>
+) {
+    setter((prev) => new Set(prev).add(id));
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+        setter((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+        });
+    }, 600);
+}
+
 export default function Backoffice() {
     const [messages, setMessages] = useState<Message[]>([]);
+    const [scheduledMessages, setScheduledMessages] = useState<Message[]>([]);
     const [deadLetters, setDeadLetters] = useState<Message[]>([]);
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
+    const [newSlIds, setNewSlIds] = useState<Set<string>>(new Set());
     const [newDlIds, setNewDlIds] = useState<Set<string>>(new Set());
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const slTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const dlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         sdk.getMessages()
             .then((all) => {
-                setMessages(all.filter((m) => m.status !== "FAILED"));
+                setScheduledMessages(all.filter(isScheduledPending));
+                setMessages(all.filter((m) => m.status !== "FAILED" && !isScheduledPending(m)));
                 setDeadLetters(all.filter((m) => m.status === "FAILED"));
             })
             .catch((err: Error) => setError(err.message))
@@ -50,8 +74,9 @@ export default function Backoffice() {
                 const msg: Message = { ...raw, schedule: new Date(raw.schedule) };
 
                 if (queueName === "deadLetterQueue") {
-                    // Move message out of main queue and into dead letters
+                    // Move message out of all other queues and into dead letters
                     setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    setScheduledMessages((prev) => prev.filter((m) => m.id !== msg.id));
                     setDeadLetters((prev) => {
                         const idx = prev.findIndex((m) => m.id === msg.id);
                         if (idx === -1) return [msg, ...prev];
@@ -59,16 +84,32 @@ export default function Backoffice() {
                         next[idx] = msg;
                         return next;
                     });
-                    setNewDlIds((prev) => new Set(prev).add(msg.id));
-                    if (dlTimerRef.current) clearTimeout(dlTimerRef.current);
-                    dlTimerRef.current = setTimeout(() => {
-                        setNewDlIds((prev) => {
-                            const next = new Set(prev);
-                            next.delete(msg.id);
+                    flashId(msg.id, setNewDlIds, dlTimerRef);
+                } else if (queueName === "scheduledQueue") {
+                    if (msg.status === "PENDING") {
+                        // Add/update in scheduled list
+                        setScheduledMessages((prev) => {
+                            const idx = prev.findIndex((m) => m.id === msg.id);
+                            if (idx === -1) return [msg, ...prev];
+                            const next = [...prev];
+                            next[idx] = msg;
                             return next;
                         });
-                    }, 600);
+                        flashId(msg.id, setNewSlIds, slTimerRef);
+                    } else {
+                        // Message has been processed (SENT/RETRIED) — move to main queue
+                        setScheduledMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                        setMessages((prev) => {
+                            const idx = prev.findIndex((m) => m.id === msg.id);
+                            if (idx === -1) return [msg, ...prev];
+                            const next = [...prev];
+                            next[idx] = msg;
+                            return next;
+                        });
+                        flashId(msg.id, setNewIds, timerRef);
+                    }
                 } else {
+                    // messageQueue — add/update in main messages list
                     setMessages((prev) => {
                         const idx = prev.findIndex((m) => m.id === msg.id);
                         if (idx === -1) return [msg, ...prev];
@@ -76,15 +117,7 @@ export default function Backoffice() {
                         next[idx] = msg;
                         return next;
                     });
-                    setNewIds((prev) => new Set(prev).add(msg.id));
-                    if (timerRef.current) clearTimeout(timerRef.current);
-                    timerRef.current = setTimeout(() => {
-                        setNewIds((prev) => {
-                            const next = new Set(prev);
-                            next.delete(msg.id);
-                            return next;
-                        });
-                    }, 600);
+                    flashId(msg.id, setNewIds, timerRef);
                 }
             } catch {
                 // ignore malformed frames
@@ -156,6 +189,23 @@ export default function Backoffice() {
                     ) : (
                         deadLetters.map((msg) => (
                             <MessageCard key={msg.id} msg={msg} isNew={newDlIds.has(msg.id)} />
+                        ))
+                    )}
+                </div>
+
+                {/* Scheduled Queue */}
+                <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-mono tracking-tight text-yellow-500">Scheduled Queue</h2>
+                        <p className="text-sm text-muted-foreground font-mono">
+                            {scheduledMessages.length} scheduled message{scheduledMessages.length !== 1 ? "s" : ""}
+                        </p>
+                    </div>
+                    {scheduledMessages.length === 0 ? (
+                        <p className="text-sm font-mono text-muted-foreground">No scheduled messages.</p>
+                    ) : (
+                        scheduledMessages.map((msg) => (
+                            <MessageCard key={msg.id} msg={msg} isNew={newSlIds.has(msg.id)} />
                         ))
                     )}
                 </div>
