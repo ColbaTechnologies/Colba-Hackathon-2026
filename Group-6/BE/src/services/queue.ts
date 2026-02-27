@@ -35,9 +35,7 @@ export class QueueService extends EventEmitter {
         this.emit(this.eventMessage, message);
     }
     public dequeue(): MessageData | undefined {
-        var dequeuedMessage = this.queue.shift();
-        this.notifyUpdate(this.eventMessage, dequeuedMessage!);
-        return dequeuedMessage;
+        return this.queue.shift();
     }
     public enqueueScheduled(message: MessageData) {
         let low = 0

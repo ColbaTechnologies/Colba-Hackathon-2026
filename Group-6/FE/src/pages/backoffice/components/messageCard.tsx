@@ -7,11 +7,11 @@ import Detail from "./detail";
 // Re-export for consumers (backoffice.tsx)
 export type { Message };
 
-export default function MessageCard({ msg, isNew }: { msg: Message; isNew: boolean }) {
+export default function MessageCard({ msg, isNew, isExiting }: { msg: Message; isNew: boolean; isExiting?: boolean }) {
     const [expanded, setExpanded] = useState(false);
 
     return (
-        <div className={`border border-border bg-card text-card-foreground p-5 flex flex-col gap-3${isNew ? " msg-slide-in" : ""}`}>
+        <div className={`border border-border bg-card text-card-foreground p-5 flex flex-col gap-3${isExiting ? " msg-slide-out" : isNew ? " msg-slide-in" : ""}`}>
             <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                     <span className="font-mono text-xs text-muted-foreground shrink-0">#{msg.id}</span>

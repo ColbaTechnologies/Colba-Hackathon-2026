@@ -16,6 +16,13 @@ const SLIDE_STYLE = `
 .msg-slide-in {
   animation: slideInLeft 1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+@keyframes slideOutRight {
+  from { transform: translateX(0);      opacity: 1; }
+  to   { transform: translateX(200px);  opacity: 0; }
+}
+.msg-slide-out {
+  animation: slideOutRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 `;
 
 function isScheduledPending(m: Message): boolean {
@@ -45,6 +52,7 @@ export default function Backoffice() {
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
     const [newSlIds, setNewSlIds] = useState<Set<string>>(new Set());
     const [newDlIds, setNewDlIds] = useState<Set<string>>(new Set());
+    const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -97,8 +105,41 @@ export default function Backoffice() {
                         });
                         flashId(msg.id, setNewSlIds, slTimerRef);
                     } else {
-                        // Message has been processed (SENT/RETRIED) — move to main queue
-                        setScheduledMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                        // Message has been processed (SENT) — slide it out of the scheduled queue
+                        setScheduledMessages((prev) => {
+                            const idx = prev.findIndex((m) => m.id === msg.id);
+                            if (idx === -1) return prev;
+                            const next = [...prev];
+                            next[idx] = msg;
+                            return next;
+                        });
+                        setTimeout(() => {
+                            setExitingIds((prev) => new Set(prev).add(msg.id));
+                            setTimeout(() => {
+                                setScheduledMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                                setExitingIds((prev) => { const next = new Set(prev); next.delete(msg.id); return next; });
+                            }, 500);
+                        }, 3000);
+                    }
+                } else {
+                    // messageQueue — add/update in main messages list
+                    if (msg.status === "SENT") {
+                        // Update status badge, then animate the card out
+                        setMessages((prev) => {
+                            const idx = prev.findIndex((m) => m.id === msg.id);
+                            if (idx === -1) return prev;
+                            const next = [...prev];
+                            next[idx] = msg;
+                            return next;
+                        });
+                        setTimeout(() => {
+                            setExitingIds((prev) => new Set(prev).add(msg.id));
+                            setTimeout(() => {
+                                setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                                setExitingIds((prev) => { const next = new Set(prev); next.delete(msg.id); return next; });
+                            }, 500);
+                        }, 3000);
+                    } else {
                         setMessages((prev) => {
                             const idx = prev.findIndex((m) => m.id === msg.id);
                             if (idx === -1) return [msg, ...prev];
@@ -108,16 +149,6 @@ export default function Backoffice() {
                         });
                         flashId(msg.id, setNewIds, timerRef);
                     }
-                } else {
-                    // messageQueue — add/update in main messages list
-                    setMessages((prev) => {
-                        const idx = prev.findIndex((m) => m.id === msg.id);
-                        if (idx === -1) return [msg, ...prev];
-                        const next = [...prev];
-                        next[idx] = msg;
-                        return next;
-                    });
-                    flashId(msg.id, setNewIds, timerRef);
                 }
             } catch {
                 // ignore malformed frames
@@ -178,7 +209,7 @@ export default function Backoffice() {
                         </p>
                     </div>
                     {messages.map((msg) => (
-                        <MessageCard key={msg.id} msg={msg} isNew={newIds.has(msg.id)} />
+                        <MessageCard key={msg.id} msg={msg} isNew={newIds.has(msg.id)} isExiting={exitingIds.has(msg.id)} />
                     ))}
                 </div>
 
@@ -211,7 +242,7 @@ export default function Backoffice() {
                         <p className="text-sm font-mono text-muted-foreground">No scheduled messages.</p>
                     ) : (
                         scheduledMessages.map((msg) => (
-                            <MessageCard key={msg.id} msg={msg} isNew={newSlIds.has(msg.id)} />
+                            <MessageCard key={msg.id} msg={msg} isNew={newSlIds.has(msg.id)} isExiting={exitingIds.has(msg.id)} />
                         ))
                     )}
                 </div>
