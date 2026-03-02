@@ -2,40 +2,48 @@ using System.Text.Json.Serialization;
 using ActorBaseMessaging.Models;
 using ActorBaseMessaging.Services;
 using Proto;
+using Raven.Client.Documents;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Services ──────────────────────────────────────────────────────────────────
 
-// Named HttpClient with a reasonable timeout for outbound forwarding
 builder.Services.AddHttpClient("MessageForwarder", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-// Serialize enums as strings in JSON responses
 builder.Services.ConfigureHttpJsonOptions(opts =>
     opts.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-// Proto.Actor system – singleton for the lifetime of the app
 builder.Services.AddSingleton<ActorSystem>();
 
-// Our registry / actor-system façade
+// RavenDB document store — configured from appsettings.json "RavenDb" section
+builder.Services.AddSingleton<IDocumentStore>(sp =>
+{
+    var cfg      = builder.Configuration.GetSection("RavenDb");
+    var urls     = cfg.GetSection("Urls").Get<string[]>()
+                   ?? throw new InvalidOperationException("RavenDb:Urls is not configured.");
+    var database = cfg["DatabaseName"]
+                   ?? throw new InvalidOperationException("RavenDb:DatabaseName is not configured.");
+
+    var store = new DocumentStore { Urls = urls, Database = database };
+    store.Initialize();
+    return store;
+});
+
 builder.Services.AddSingleton<MessageActorSystem>();
 
 // ── Build ─────────────────────────────────────────────────────────────────────
 
 var app = builder.Build();
 
-// Eagerly resolve so the actor system is warm before the first request
-app.Services.GetRequiredService<MessageActorSystem>();
+// Run crash recovery before the HTTP server starts accepting requests.
+var messagingSystem = app.Services.GetRequiredService<MessageActorSystem>();
+await messagingSystem.InitializeAsync();
 
 // ── Endpoints ─────────────────────────────────────────────────────────────────
 
-// POST /messages
-// Body: { "targetUrl": "https://...", "payload": { ... } }
-// Returns 202 Accepted with { "requestId": "<id>" }
-// Location header points to the status endpoint.
 app.MapPost("/messages", (InboundRequest request, MessageActorSystem actorSystem) =>
 {
     if (string.IsNullOrWhiteSpace(request.TargetUrl))
@@ -44,13 +52,9 @@ app.MapPost("/messages", (InboundRequest request, MessageActorSystem actorSystem
     var requestId = Guid.NewGuid().ToString("N");
     actorSystem.Enqueue(requestId, request.TargetUrl, request.Payload);
 
-    return Results.Accepted(
-        $"/messages/{requestId}",
-        new { requestId });
+    return Results.Accepted($"/messages/{requestId}", new { requestId });
 });
 
-// GET /messages/{requestId}
-// Returns the current status snapshot of the actor.
 app.MapGet("/messages/{requestId}", async (string requestId, MessageActorSystem actorSystem) =>
 {
     var status = await actorSystem.GetStatusAsync(requestId);
