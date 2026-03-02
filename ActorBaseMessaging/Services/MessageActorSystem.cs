@@ -34,7 +34,7 @@ public sealed class MessageActorSystem(
         var pid = system.Root.Spawn(props);
         _registry[requestId] = pid;
     }
-
+    
     /// <summary>
     /// Queries the actor for its current status snapshot.
     /// Returns <c>null</c> if the request ID is unknown.
