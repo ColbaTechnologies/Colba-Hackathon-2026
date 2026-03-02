@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Http\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+      <PackageReference Include="RavenMigrations" Version="6.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
+        <HintPath>..\..\..\..\..\..\..\usr\local\share\dotnet\x64\shared\Microsoft.AspNetCore.App\8.0.20\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+        <HintPath>..\..\..\..\..\..\..\usr\local\share\dotnet\x64\shared\Microsoft.AspNetCore.App\8.0.20\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Http">
+        <HintPath>..\..\..\..\..\..\..\usr\local\share\dotnet\x64\shared\Microsoft.AspNetCore.App\8.0.20\Microsoft.Extensions.Http.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Options">
+        <HintPath>..\..\..\..\..\..\..\usr\local\share\dotnet\x64\shared\Microsoft.AspNetCore.App\8.0.20\Microsoft.Extensions.Options.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MessagingSystem.Application\MessagingSystem.Application.csproj" />
+      <ProjectReference Include="..\MessagingSystem.Domain\MessagingSystem.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
