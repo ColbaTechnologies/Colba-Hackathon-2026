@@ -1,0 +1,25 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889" # Prometheus scraping endpoint
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"  # Loki logs
+  otlp/tempo:
+    endpoint: "tempo:4317"  # OTLP gRPC for Tempo
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      exporters: [loki]
+    traces:
+      receivers: [ otlp ]
+      exporters: [ otlp/tempo ]
