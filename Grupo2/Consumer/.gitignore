@@ -1,0 +1,25 @@
+# Build
+bin/
+obj/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+
+# Logs
+*.log
+
+# Environment
+.env
+appsettings.Development.json
+
+# OS
+.DS_Store
+Thumbs.db
