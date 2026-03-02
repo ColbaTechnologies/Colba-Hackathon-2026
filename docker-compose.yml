@@ -1,0 +1,47 @@
+services:
+
+  ravendb:
+    image: ravendb/ravendb:latest
+    environment:
+      RAVEN_ARGS: "--Setup.Mode=None"
+      RAVEN_Security_UnsecuredAccessAllowed: "PrivateNetwork"
+      RAVEN_License_Eula_Accepted: "true"
+    ports:
+      - "8080:8080"
+      - "38888:38888"
+    volumes:
+      - ravendb_data:/var/lib/ravendb/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/alive || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: src/ActorBaseMessaging.Api/Dockerfile
+    ports:
+      - "5141:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      RavenDb__Urls__0: http://ravendb:8080
+      RavenDb__DatabaseName: ActorBaseMessaging
+    depends_on:
+      ravendb:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ActorBaseMessagingClient
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    depends_on:
+      - api
+    profiles:
+      - client
+
+volumes:
+  ravendb_data:

@@ -7,6 +7,8 @@ using ActorBaseMessaging.Infrastructure.Http;
 using ActorBaseMessaging.Infrastructure.Persistence;
 using Proto;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Operations.Databases;
+using Raven.Client.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +35,16 @@ builder.Services.AddSingleton<IDocumentStore>(sp =>
 
     var store = new DocumentStore { Urls = urls, Database = database };
     store.Initialize();
+
+    try
+    {
+        store.Maintenance.Server.Send(new CreateDatabaseOperation(new DatabaseRecord(database)));
+    }
+    catch (ConcurrencyException)
+    {
+        // Database already exists — safe to ignore.
+    }
+
     return store;
 });
 
