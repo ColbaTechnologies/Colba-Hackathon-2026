@@ -1,5 +1,5 @@
-# Raven
-RavenData/
-ProducerConsumer/.idea
-ProducerConsumer/telemetry/tempo/data/traces
-ProducerConsumer/telemetry/tempo/data
+.idea
+
+
+UQ/UQ.Api/bin
+UQ/UQ.Api/obj
