@@ -1,0 +1,6 @@
+fastapi==0.103.2
+pydantic==2.12.5
+uvicorn
+asyncpg
+dotenv
+httpx
