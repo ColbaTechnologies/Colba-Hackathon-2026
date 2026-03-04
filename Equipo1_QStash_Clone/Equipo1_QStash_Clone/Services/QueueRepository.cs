@@ -5,6 +5,9 @@ using Raven.Client.Documents.Linq;
 
 namespace Equipo1_QStash_Clone.Services;
 
+// TODO @HACKATHON - why not async? - use concurrent dictionaries
+// TODO @HACKATHON - not scallable, should separate creating the queue from adding the first messages, state is keep locally, if a instance without the queue is called it will return error
+// TODO @HACKATHON - on start all instances should load the queues but only one instance will start processing pending messages
 public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore store, QueueMetrics metrics)
 {
     private static readonly Dictionary<string, Channel<string>>  Queue = new();
@@ -22,6 +25,7 @@ public class QueueRepository(ILogger<QueueRepository> logger, IDocumentStore sto
         _ = Task.Run(async () => { await consumer.Start(queueId); });
         Consumer.Add(queueId, consumer);
         
+        // TODO @HACKATHON - why not async?
         var session = store.OpenSession();
         var messages = session.
             Query<PersistedMessage>()

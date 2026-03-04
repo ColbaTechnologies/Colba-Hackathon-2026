@@ -7,6 +7,7 @@ namespace Equipo1_QStash_Clone.Services;
 
 public class ChannelSeeder(QueueRepository queueRepository, IDocumentStore store) : BackgroundService
 {
+    // TODO @HACKATHON - not controller compare exchange results, can break app
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var cmpXchgResult = store.Operations.Send(new PutCompareExchangeValueOperation<string>("lock", "lock", 0));

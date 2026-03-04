@@ -81,10 +81,13 @@ app.MapGet("/health", () =>
     .WithName("health")
     .WithOpenApi();
 
+// TODO @HACKATHON - can be grouped on Endspoints classes
+
 app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueRepository, IDocumentStore store, QueueMetrics metrics) =>
 {
     var sw = metrics.StartPublishTimer();
-    var channel = queueRepository.GetChannelQueue(inputMessage.QueueId);
+    var channel = queueRepository.GetChannelQueue(inputMessage.QueueId); // TODO @HACKATHON - not check if not found?
+    // TODO @HACKATHON - should check on db if the queue exists?
     
     var currentMessage =new PersistedMessage
     {
@@ -103,6 +106,8 @@ app.MapPost("/publish", async (InputMessage inputMessage, QueueRepository queueR
     metrics.RecordPublishDuration(sw, inputMessage.QueueId);
     return Results.Ok();
 });
+
+// TODO @HACKATHON - can be grouped on QueueEndpoints
 
 app.MapPost("/queue", async (string queueName, bool deathLetterEnable, bool isFifo, IDocumentStore store, QueueRepository queueRepository) =>
 {
