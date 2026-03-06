@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Operations.CompareExchange;
 
 public sealed class RavenDbMessageRepository(IDocumentStore store) : IMessageRepository
 {
@@ -31,26 +32,33 @@ public sealed class RavenDbMessageRepository(IDocumentStore store) : IMessageRep
         return docs.Select(d => d.ToEntity()).ToList();
     }
 
+    private const string RecoveryCxKey = "recovery/completed-at";
+
     public async Task MarkRecoveryCompleteAsync()
     {
-        using var session = store.OpenAsyncSession();
-        var doc = await session.LoadAsync<RecoveryMetadataDocument>(RecoveryMetadataDocument.DocumentId)
-                  ?? new RecoveryMetadataDocument();
-        doc.CompletedAt = DateTime.UtcNow;
-        await session.StoreAsync(doc, RecoveryMetadataDocument.DocumentId);
-        await session.SaveChangesAsync();
+        // CAS write: get current index then atomically swap in the new timestamp.
+        // Retry if another writer changed the index between get and put.
+        while (true)
+        {
+            var current = await store.Operations.SendAsync(
+                new GetCompareExchangeValueOperation<DateTime?>(RecoveryCxKey));
+
+            var result = await store.Operations.SendAsync(
+                new PutCompareExchangeValueOperation<DateTime?>(
+                    RecoveryCxKey,
+                    DateTime.UtcNow,
+                    current?.Index ?? 0));
+
+            if (result.Successful) return;
+            // Index changed — another initializer raced us; retry to ensure our timestamp wins.
+        }
     }
 
     public async Task<DateTime?> GetRecoveryCompletedAtAsync()
     {
-        using var session = store.OpenAsyncSession();
-        var doc = await session.LoadAsync<RecoveryMetadataDocument>(RecoveryMetadataDocument.DocumentId);
-        return doc?.CompletedAt;
-    }
+        var result = await store.Operations.SendAsync(
+            new GetCompareExchangeValueOperation<DateTime?>(RecoveryCxKey));
 
-    private sealed class RecoveryMetadataDocument
-    {
-        public const string DocumentId = "recovery/metadata";
-        public DateTime? CompletedAt { get; set; }
+        return result?.Value;
     }
 }
