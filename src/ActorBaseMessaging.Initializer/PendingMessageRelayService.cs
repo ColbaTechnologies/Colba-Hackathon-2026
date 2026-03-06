@@ -1,6 +1,7 @@
 namespace ActorBaseMessaging.Initializer;
 
 using System.Net.Http.Json;
+using System.Text.Json;
 using ActorBaseMessaging.Domain.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,9 +31,13 @@ public sealed class PendingMessageRelayService(
             {
                 try
                 {
+                    JsonElement payload;
+                    using (var jsonDoc = JsonDocument.Parse(req.RawPayload))
+                        payload = jsonDoc.RootElement.Clone();
+
                     var response = await client.PostAsJsonAsync(
-                        $"{apiBaseUrl.TrimEnd('/')}/internal/requeue",
-                        new { requestId = req.Id, targetUrl = req.TargetUrl, rawPayload = req.RawPayload },
+                        $"{apiBaseUrl.TrimEnd('/')}/internal/requeue/{req.Id}",
+                        new { targetUrl = req.TargetUrl, payload },
                         stoppingToken);
 
                     if (response.IsSuccessStatusCode)

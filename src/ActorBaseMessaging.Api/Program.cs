@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using ActorBaseMessaging.Api.Models;
 using ActorBaseMessaging.Application.Interfaces;
@@ -87,10 +86,9 @@ app.MapGet("/messages/{requestId}", async (string requestId, IMessageActorSystem
         : Results.Ok(status);
 });
 
-app.MapPost("/internal/requeue", (RequeueRequest req, IMessageActorSystem actorSystem) =>
+app.MapPost("/internal/requeue/{requestId}", (string requestId, InboundRequest req, IMessageActorSystem actorSystem) =>
 {
-    using var doc = JsonDocument.Parse(req.RawPayload);
-    actorSystem.Enqueue(req.RequestId, req.TargetUrl, doc.RootElement.Clone());
+    actorSystem.Enqueue(requestId, req.TargetUrl, req.Payload);
     return Results.Accepted();
 });
 
