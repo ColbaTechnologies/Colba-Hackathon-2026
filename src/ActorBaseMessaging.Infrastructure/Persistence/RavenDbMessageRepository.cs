@@ -30,4 +30,27 @@ public sealed class RavenDbMessageRepository(IDocumentStore store) : IMessageRep
 
         return docs.Select(d => d.ToEntity()).ToList();
     }
+
+    public async Task MarkRecoveryCompleteAsync()
+    {
+        using var session = store.OpenAsyncSession();
+        var doc = await session.LoadAsync<RecoveryMetadataDocument>(RecoveryMetadataDocument.DocumentId)
+                  ?? new RecoveryMetadataDocument();
+        doc.CompletedAt = DateTime.UtcNow;
+        await session.StoreAsync(doc, RecoveryMetadataDocument.DocumentId);
+        await session.SaveChangesAsync();
+    }
+
+    public async Task<DateTime?> GetRecoveryCompletedAtAsync()
+    {
+        using var session = store.OpenAsyncSession();
+        var doc = await session.LoadAsync<RecoveryMetadataDocument>(RecoveryMetadataDocument.DocumentId);
+        return doc?.CompletedAt;
+    }
+
+    private sealed class RecoveryMetadataDocument
+    {
+        public const string DocumentId = "recovery/metadata";
+        public DateTime? CompletedAt { get; set; }
+    }
 }

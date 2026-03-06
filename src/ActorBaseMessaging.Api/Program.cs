@@ -64,9 +64,9 @@ var app = builder.Build();
 
 app.MapGet("/health", () => Results.Ok());
 
-app.MapPost("/messages", (InboundRequest request, IMessageActorSystem actorSystem, ApiReadinessService readiness) =>
+app.MapPost("/messages", async (InboundRequest request, IMessageActorSystem actorSystem, ApiReadinessService readiness) =>
 {
-    if (!readiness.IsReady)
+    if (!await readiness.EnsureReadyAsync())
         return Results.StatusCode(503);
 
     if (string.IsNullOrWhiteSpace(request.TargetUrl))
@@ -92,12 +92,6 @@ app.MapPost("/internal/requeue", (RequeueRequest req, IMessageActorSystem actorS
     using var doc = JsonDocument.Parse(req.RawPayload);
     actorSystem.Enqueue(req.RequestId, req.TargetUrl, doc.RootElement.Clone());
     return Results.Accepted();
-});
-
-app.MapPost("/internal/recovery-complete", (ApiReadinessService readiness) =>
-{
-    readiness.MarkReady();
-    return Results.Ok();
 });
 
 app.Run();

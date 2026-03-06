@@ -6,10 +6,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 public sealed class PendingMessageRelayService(
-    IMessageRepository    repository,
-    IHttpClientFactory    httpClientFactory,
-    IConfiguration        configuration,
-    IHostApplicationLifetime lifetime,
+    IMessageRepository          repository,
+    IHttpClientFactory          httpClientFactory,
+    IConfiguration              configuration,
+    IHostApplicationLifetime    lifetime,
     ILogger<PendingMessageRelayService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,16 +54,12 @@ public sealed class PendingMessageRelayService(
         {
             try
             {
-                var client = httpClientFactory.CreateClient("ApiClient");
-                await client.PostAsync(
-                    $"{apiBaseUrl.TrimEnd('/')}/internal/recovery-complete",
-                    content: null,
-                    stoppingToken);
-                logger.LogInformation("Signalled recovery-complete to API.");
+                await repository.MarkRecoveryCompleteAsync();
+                logger.LogInformation("Recovery-complete flag written to database.");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to signal recovery-complete to API.");
+                logger.LogError(ex, "Failed to write recovery-complete flag to database.");
             }
 
             logger.LogInformation("PendingMessageRelayService finished. Stopping application.");
