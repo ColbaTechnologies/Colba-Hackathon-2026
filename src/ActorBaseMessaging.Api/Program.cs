@@ -4,6 +4,7 @@ using ActorBaseMessaging.Api.Models;
 using ActorBaseMessaging.Application.Interfaces;
 using ActorBaseMessaging.Application.Services;
 using ActorBaseMessaging.Domain.Interfaces;
+using ActorBaseMessaging.Api.Services;
 using ActorBaseMessaging.Infrastructure.Http;
 using ActorBaseMessaging.Infrastructure.Persistence;
 using Proto;
@@ -53,6 +54,7 @@ builder.Services.AddSingleton<IDocumentStore>(sp =>
 builder.Services.AddSingleton<IMessageRepository, RavenDbMessageRepository>();
 builder.Services.AddSingleton<IMessageForwarder, HttpMessageForwarder>();
 builder.Services.AddSingleton<IMessageActorSystem, MessageActorSystem>();
+builder.Services.AddSingleton<ApiReadinessService>();
 
 // ── Build ─────────────────────────────────────────────────────────────────────
 
@@ -62,8 +64,11 @@ var app = builder.Build();
 
 app.MapGet("/health", () => Results.Ok());
 
-app.MapPost("/messages", (InboundRequest request, IMessageActorSystem actorSystem) =>
+app.MapPost("/messages", (InboundRequest request, IMessageActorSystem actorSystem, ApiReadinessService readiness) =>
 {
+    if (!readiness.IsReady)
+        return Results.StatusCode(503);
+
     if (string.IsNullOrWhiteSpace(request.TargetUrl))
         return Results.BadRequest(new { error = "targetUrl is required." });
 
@@ -87,6 +92,12 @@ app.MapPost("/internal/requeue", (RequeueRequest req, IMessageActorSystem actorS
     using var doc = JsonDocument.Parse(req.RawPayload);
     actorSystem.Enqueue(req.RequestId, req.TargetUrl, doc.RootElement.Clone());
     return Results.Accepted();
+});
+
+app.MapPost("/internal/recovery-complete", (ApiReadinessService readiness) =>
+{
+    readiness.MarkReady();
+    return Results.Ok();
 });
 
 app.Run();

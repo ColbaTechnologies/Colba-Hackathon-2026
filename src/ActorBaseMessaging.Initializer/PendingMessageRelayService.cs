@@ -52,6 +52,20 @@ public sealed class PendingMessageRelayService(
         }
         finally
         {
+            try
+            {
+                var client = httpClientFactory.CreateClient("ApiClient");
+                await client.PostAsync(
+                    $"{apiBaseUrl.TrimEnd('/')}/internal/recovery-complete",
+                    content: null,
+                    stoppingToken);
+                logger.LogInformation("Signalled recovery-complete to API.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to signal recovery-complete to API.");
+            }
+
             logger.LogInformation("PendingMessageRelayService finished. Stopping application.");
             lifetime.StopApplication();
         }

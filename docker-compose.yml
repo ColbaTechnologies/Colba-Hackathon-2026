@@ -28,6 +28,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       RavenDb__Urls__0: http://ravendb:8080
       RavenDb__DatabaseName: ActorBaseMessaging
+      Api__RequireInitializer: "true"
     depends_on:
       ravendb:
         condition: service_healthy
