@@ -31,17 +31,25 @@ services:
     depends_on:
       ravendb:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
-  client:
+  initializer:
     build:
-      context: ActorBaseMessagingClient
-      dockerfile: Dockerfile
-    stdin_open: true
-    tty: true
+      context: .
+      dockerfile: src/ActorBaseMessaging.Initializer/Dockerfile
+    environment:
+      RavenDb__Urls__0: http://ravendb:8080
+      RavenDb__DatabaseName: ActorBaseMessaging
+      Initializer__ApiBaseUrl: http://api:8080
     depends_on:
-      - api
-    profiles:
-      - client
+      api:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   ravendb_data:

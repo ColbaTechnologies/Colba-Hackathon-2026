@@ -12,10 +12,6 @@ using Proto;
 /// <summary>
 /// Singleton service that owns the <see cref="ActorSystem"/> and acts as the
 /// registry between HTTP request IDs and actor PIDs.
-///
-/// On startup <see cref="InitializeAsync"/> queries the repository for any
-/// Pending or Retrying records left over from a previous process and re-spawns
-/// their actors so delivery continues automatically (crash recovery).
 /// </summary>
 public sealed class MessageActorSystem(
     ActorSystem        system,
@@ -24,35 +20,6 @@ public sealed class MessageActorSystem(
     ILoggerFactory     loggerFactory) : IMessageActorSystem, IDisposable
 {
     private readonly ConcurrentDictionary<string, PID> _registry = new();
-    private readonly ILogger _logger = loggerFactory.CreateLogger<MessageActorSystem>();
-
-    // ── Startup ───────────────────────────────────────────────────────────────
-
-    public async Task InitializeAsync()
-    {
-        _logger.LogInformation("Starting crash recovery: querying in-flight requests.");
-
-        try
-        {
-            var inflight = await repository.GetInFlightAsync();
-
-            _logger.LogInformation("Recovery: found {Count} in-flight record(s) to resume.", inflight.Count);
-
-            foreach (var req in inflight)
-            {
-                JsonElement payloadElement;
-                using (var jsonDoc = JsonDocument.Parse(req.RawPayload))
-                    payloadElement = jsonDoc.RootElement.Clone();
-
-                Enqueue(req.Id, req.TargetUrl, payloadElement);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,
-                "Crash recovery query failed. In-flight messages from the previous run will not be retried automatically.");
-        }
-    }
 
     // ── Public API ────────────────────────────────────────────────────────────
 

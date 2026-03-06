@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ActorBaseMessaging.Api.Models;
 using ActorBaseMessaging.Application.Interfaces;
@@ -7,8 +8,9 @@ using ActorBaseMessaging.Infrastructure.Http;
 using ActorBaseMessaging.Infrastructure.Persistence;
 using Proto;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Operations.Databases;
+using Raven.Client.ServerWide.Operations;
 using Raven.Client.Exceptions;
+using Raven.Client.ServerWide;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,11 +58,9 @@ builder.Services.AddSingleton<IMessageActorSystem, MessageActorSystem>();
 
 var app = builder.Build();
 
-// Run crash recovery before the HTTP server starts accepting requests.
-var messagingSystem = app.Services.GetRequiredService<IMessageActorSystem>();
-await messagingSystem.InitializeAsync();
-
 // ── Endpoints ─────────────────────────────────────────────────────────────────
+
+app.MapGet("/health", () => Results.Ok());
 
 app.MapPost("/messages", (InboundRequest request, IMessageActorSystem actorSystem) =>
 {
@@ -80,6 +80,13 @@ app.MapGet("/messages/{requestId}", async (string requestId, IMessageActorSystem
     return status is null
         ? Results.NotFound(new { error = $"Request '{requestId}' not found." })
         : Results.Ok(status);
+});
+
+app.MapPost("/internal/requeue", (RequeueRequest req, IMessageActorSystem actorSystem) =>
+{
+    using var doc = JsonDocument.Parse(req.RawPayload);
+    actorSystem.Enqueue(req.RequestId, req.TargetUrl, doc.RootElement.Clone());
+    return Results.Accepted();
 });
 
 app.Run();
