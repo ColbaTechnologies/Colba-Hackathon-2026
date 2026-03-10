@@ -1,7 +1,6 @@
 services:
-
   ravendb:
-    image: ravendb/ravendb:latest
+    image: ravendb/ravendb:7.2-latest
     environment:
       RAVEN_ARGS: "--Setup.Mode=None"
       RAVEN_Security_UnsecuredAccessAllowed: "PrivateNetwork"
@@ -12,7 +11,7 @@ services:
     volumes:
       - ravendb_data:/var/lib/ravendb/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/alive || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

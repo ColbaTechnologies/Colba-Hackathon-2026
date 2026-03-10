@@ -21,4 +21,8 @@ COPY --from=build /out .
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 
+RUN apt-get update \
+    && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/*
+
 ENTRYPOINT ["dotnet", "ActorBaseMessaging.Api.dll"]
