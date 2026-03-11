@@ -1,15 +1,17 @@
 import { serve } from '@hono/node-server'
-import { buildApi } from './api.js';
+import { runBackgrounProcess } from './infrastructure/background-runner';
+import { processMessages } from './messages/process-messages';
+import { connectToDb } from './infrastructure/drizzle';
+import { env } from './infrastructure/env';
+import { buildApi } from './infrastructure/hono';
+import { buildMessageRepository } from './messages/infrastructure/repository';
 
-const api = buildApi();
+const appId = crypto.randomUUID();
+const db = connectToDb(env.DATABASE_URL);
+const repo = buildMessageRepository(appId, db);
 
-new Promise(async () => {
-  while (true) { 
-    console.log('Running backgroun server...')
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    throw new Error('Background server error')
-  }
-});
+const api = buildApi({ appId, repo });
+runBackgrounProcess('message-processor', processMessages(repo));
 
 serve({
   fetch: api.fetch,

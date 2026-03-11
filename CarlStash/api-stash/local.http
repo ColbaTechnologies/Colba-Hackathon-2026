@@ -1,0 +1,30 @@
+@PORT = 3000
+
+###
+
+GET http://localhost:{{PORT}}/api/alive
+
+###
+
+# WILL FAIL
+
+POST http://localhost:{{PORT}}/api/messages
+Content-Type: application/json
+
+{
+  "destination": "https://asdasd",
+  "payload": "{ \"message\": \"Hello, World!\" }"
+}
+
+
+###
+
+# WILL WORK
+
+POST http://localhost:{{PORT}}/api/messages
+Content-Type: application/json
+
+{
+  "destination": "https://webhook.site/2f6d2cd7-3f2c-4a56-b65d-2e611bf8ce8c",
+  "payload": "{ \"message\": \"Hello, World!\" }"
+}
