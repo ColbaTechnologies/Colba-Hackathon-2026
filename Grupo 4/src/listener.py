@@ -10,7 +10,7 @@ from domain.repositories.message import MessageRepository
 
 logger = logging.getLogger(__name__)
 
-
+# TODO @HACKATHON - this should be use case and the worker call it
 class MessageListener:
     """Worker que extrae mensajes de la BD y los entrega a su destino"""
 

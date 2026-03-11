@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj": {}
+    "/Users/carlosad/DEV/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj": {}
   },
   "projects": {
-    "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj": {
+    "/Users/carlosad/DEV/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+        "projectUniqueName": "/Users/carlosad/DEV/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
         "projectName": "Equipo1_QStash_Clone",
-        "projectPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
-        "packagesPath": "/Users/salva/.nuget/packages/",
-        "outputPath": "/Users/salva/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/obj/",
+        "projectPath": "/Users/carlosad/DEV/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/Equipo1_QStash_Clone.csproj",
+        "packagesPath": "/Users/carlosad/.nuget/packages/",
+        "outputPath": "/Users/carlosad/DEV/Colba-Hackathon-2026/Equipo1_QStash_Clone/Equipo1_QStash_Clone/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/salva/.nuget/NuGet/NuGet.Config"
+          "/Users/carlosad/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -38,7 +38,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -104,6 +105,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-arm64",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -112,7 +127,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.405/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
