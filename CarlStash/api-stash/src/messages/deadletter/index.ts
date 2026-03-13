@@ -8,7 +8,7 @@ export const retriggerMessage = async (repo: MessagesRepository, messageId: UUID
     return "NOT_FOUND_MESSAGE" as const;
   }
 
-  await repo.setForRetrigger(maybeMessage);
+  await repo.retrigger(maybeMessage);
 
   return "RETRIGGERED" as const;
 }

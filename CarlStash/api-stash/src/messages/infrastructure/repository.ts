@@ -7,8 +7,9 @@ import { eq } from "drizzle-orm";
 const messages: Message[] = [];
   
 const saveMessage = (appId: UUID, db: DB) => async (input: {
-  destination: URL;
+  destination: string;
   payload: string|undefined;
+  tenant: string;
 }) => {
   const message = { 
     id: crypto.randomUUID(), 
@@ -16,10 +17,8 @@ const saveMessage = (appId: UUID, db: DB) => async (input: {
   };
 
   await db.insert(pendingMessages).values({
-    id: message.id,
-    destination: message.destination.toString(),
-    payload: message.payload,
-    app: appId
+    ...message,
+    app: appId,
   });
 
   messages.push(message);
@@ -30,49 +29,53 @@ const getNextMessage = () => messages.shift();
 
 const setMessageAsSent = (db: DB) => async (message: Message) => db.transaction(async (tx) => {
   await tx.insert(sentMessages).values({
-    id: message.id,
+    id:          message.id,
     destination: message.destination.toString(),
-    payload: message.payload,
+    payload:     message.payload,
+    tenant:      message.tenant
   });
   await tx.delete(pendingMessages).where(eq(pendingMessages.id, message.id));
 });
 
 const setMessageAsFailed = (db: DB) => async (message: Message) => db.transaction(async (tx) => {
   await tx.insert(failedMessages).values({
-    id: message.id,
+    id:          message.id,
     destination: message.destination.toString(),
-    payload: message.payload,
+    payload:     message.payload,
+    tenant:      message.tenant
   });
   await tx.delete(pendingMessages).where(eq(pendingMessages.id, message.id));
 });
 
-const getFailedMessage = (db: DB) => async (id: UUID): Promise<Message | undefined> => {
+const getFailedMessage = (db: DB) => async (id: string): Promise<Message | undefined> => {
   const result = await db.select().from(failedMessages).where(eq(failedMessages.id, id));
   if (result.length === 0) return undefined;
 
   const record = result[0];
   return {
-    id: record.id as UUID,
-    destination: new URL(record.destination),
-    payload: record.payload ?? undefined
+    id:           record.id as UUID,
+    destination:  record.destination,
+    payload:      record.payload ?? undefined,
+    tenant:       record.tenant
   }
 }
 
-const setForRetrigger = (appId: UUID, db: DB) => async (message: Message) => db.transaction(async (tx) => {
+const retrigger = (appId: UUID, db: DB) => async (message: Message) => db.transaction(async (tx) => {
   await tx.insert(pendingMessages).values({
-    id: message.id,
-    destination: message.destination.toString(),
-    app: appId,
-      payload: message.payload,
+    id:           message.id,
+    destination:  message.destination.toString(),
+    app:          appId,
+    payload:      message.payload,
+    tenant:       message.tenant
   });
   await tx.delete(failedMessages).where(eq(failedMessages.id, message.id));
 });
 
 export const buildMessageRepository = (appId: UUID, db: DB) => ({
-  save: saveMessage(appId, db),
-  next: getNextMessage,
-  setAsSent: setMessageAsSent(db),
-  setAsFailed: setMessageAsFailed(db),
-  getFailed: getFailedMessage(db),
-  setForRetrigger: setForRetrigger(appId, db)
+  save:         saveMessage(appId, db),
+  next:         getNextMessage,
+  setAsSent:    setMessageAsSent(db),
+  setAsFailed:  setMessageAsFailed(db),
+  getFailed:    getFailedMessage(db),
+  retrigger:    retrigger(appId, db)
 }) satisfies MessagesRepository;

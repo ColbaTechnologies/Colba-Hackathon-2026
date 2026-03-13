@@ -37,26 +37,28 @@ const handleError = async (
   message: Message, 
   error: any
 ) => { 
-  console.error("Error processing message:", message.id, error);
+  console.error("Error processing message:", message.id);
+  console.error(message.id, error);
   console.log(`Retrying message ${message.id}...`);
 
   for(let i = 0; i < 3; i++) {
-    const retryDelay = 1000 * (i + 1);
+    const retryAttempt = i + 1;
+    const retryDelay = 1000 * retryAttempt;
     console.log(`Waiting ${retryDelay}ms before next retry attempt for message ${message.id}...`);
     await new Promise(resolve => setTimeout(resolve, retryDelay));
 
     try {
       const response = await sendMessage(message);
       if (response.ok) {
-        console.log(`Successfully processed message ${message.id} on retry attempt ${i + 1}`);
+        console.log(`Successfully processed message ${message.id} on retry attempt ${retryAttempt}`);
         await handleSuccess(repo, message);
         return;
       }
-      console.error(`Retry attempt ${i + 1} failed for message ${message.id}:`, response.statusText);
+      console.error(`Retry attempt ${retryAttempt} failed for message ${message.id}:`, response.statusText);
     }
     catch (err) {
-      console.error(`FAILED FETCH - Retry attempt ${i + 1} failed for message ${message.id}:`);
-      console.error(err);
+      console.error(`FAILED FETCH - Retry attempt ${retryAttempt} failed for message ${message.id}:`);
+      console.error(message.id, err);
     }
   }
   console.error(`All retry attempts failed for message ${message.id}. Giving up.`);

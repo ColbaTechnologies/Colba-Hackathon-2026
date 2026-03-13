@@ -6,7 +6,8 @@ export const pendingMessages = createTable(
     id: t.uuid().primaryKey(),
     destination: t.text().notNull(),
     payload: t.text(),
-    app: t.uuid().notNull()
+    app: t.uuid().notNull(),
+    tenant: t.uuid().notNull(),
   })
 );
 
@@ -16,6 +17,7 @@ export const failedMessages = createTable(
     id: t.uuid().primaryKey(),
     destination: t.text().notNull(),
     payload: t.text(),
+    tenant: t.uuid().notNull(),
   })
 );
 
@@ -25,5 +27,6 @@ export const sentMessages = createTable(
     id: t.uuid().primaryKey(),
     destination: t.text().notNull(),
     payload: t.text(),
+    tenant: t.uuid().notNull(),
   })
 );

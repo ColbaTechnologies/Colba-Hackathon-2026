@@ -1,11 +1,10 @@
 import type { UUID } from "crypto";
 import type { Hono } from "hono";
 
-type Dependencies = {
-  appId: UUID;
-}
-
-export const mapAliveEndpoint = (app: Hono, { appId }: Dependencies) => app.get(
+export const mapAliveEndpoint = (app: Hono, appId: UUID) => app.get(
   '/api/alive', 
-  (c) => c.text(`Alive! API ID: ${appId}`)
+  ctx => ctx.json({
+    message: "I am alive and running!",
+    appId
+  }, 200)
 );

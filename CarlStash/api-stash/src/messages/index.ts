@@ -1,17 +1,15 @@
-import type { UUID } from "crypto";
-import type { URL } from "url";
-
 export type Message = {
-  id: UUID;
-  destination: URL;
+  id: string;
+  destination: string;
   payload: string|undefined;
+  tenant: string;
 }
 
 export type MessagesRepository = {
-  save: (input: { destination: URL; payload: string|undefined }) => Promise<Message>;
-  next: () => Message | undefined;
-  setAsSent: (message: Message) => Promise<void>;
-  setAsFailed: (message: Message) => Promise<void>;
-  getFailed: (id: UUID) => Promise<Message | undefined>;
-  setForRetrigger: (message: Message) => Promise<void>;
+  save:         (input: { destination: string; payload: string|undefined; tenant: string }) => Promise<Message>;
+  next:         () => Message | undefined;
+  setAsSent:    (message: Message) => Promise<void>;
+  setAsFailed:  (message: Message) => Promise<void>;
+  getFailed:    (id: string) => Promise<Message | undefined>;
+  retrigger:    (message: Message) => Promise<void>;
 }
