@@ -2,7 +2,6 @@ import type { Hono } from "hono";
 import { validator } from "hono/validator";
 import z from "zod";
 import type { MessagesRepository } from ".";
-import type { UUID } from "crypto";
 
 const ingestMessagesSchema = z.object({
   destination: z.url(),

@@ -7,6 +7,7 @@ export type Message = {
 
 export type MessagesRepository = {
   save:         (input: { destination: string; payload: string|undefined; tenant: string }) => Promise<Message>;
+  addToQueue:   (id: string) => Promise<void>;
   next:         () => Message | undefined;
   setAsSent:    (message: Message) => Promise<void>;
   setAsFailed:  (message: Message) => Promise<void>;

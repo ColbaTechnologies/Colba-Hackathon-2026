@@ -71,11 +71,31 @@ const retrigger = (appId: UUID, db: DB) => async (message: Message) => db.transa
   await tx.delete(failedMessages).where(eq(failedMessages.id, message.id));
 });
 
+const addToQueue = (db: DB) => async (id: string) => {
+  const result = await db.select().from(pendingMessages).where(eq(failedMessages.id, id));
+  if (result.length === 0) {
+    console.warn(`Message with id ${id} not found in pending messages`);
+    return;
+  };
+
+  const record = result[0];
+  messages.push({
+    id:           record.id as UUID,
+    destination:  record.destination,
+    payload:      record.payload ?? undefined,
+    tenant:       record.tenant
+  });
+
+  console.log(`Message with id ${id} added to queue`);
+}
+
 export const buildMessageRepository = (appId: UUID, db: DB) => ({
   save:         saveMessage(appId, db),
   next:         getNextMessage,
   setAsSent:    setMessageAsSent(db),
   setAsFailed:  setMessageAsFailed(db),
   getFailed:    getFailedMessage(db),
-  retrigger:    retrigger(appId, db)
+  retrigger:    retrigger(appId, db),
+  addToQueue:   addToQueue(db)
+
 }) satisfies MessagesRepository;
