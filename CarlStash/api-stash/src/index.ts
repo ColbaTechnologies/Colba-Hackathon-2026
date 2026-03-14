@@ -3,20 +3,22 @@ import { processMessages } from './messages/process-messages';
 import { connectToDb } from './infrastructure/drizzle';
 import { env } from './infrastructure/env';
 import { buildApi, runApi } from './infrastructure/hono';
-import { buildMessageRepository } from './messages/infrastructure/repository';
+import { messagesRepository } from './messages/infrastructure/repository';
 import { runRegistraionProcess } from './register';
+import { tenantsRepository } from './auth/infrastructure/repository';
 
 const appId = crypto.randomUUID();
 const db = connectToDb(env.DATABASE_URL);
-const repo = buildMessageRepository(appId, db);
+const messagesRepo = messagesRepository(appId, db);
+const tenantsRepo = tenantsRepository(db);
 
-const api = buildApi(appId, repo, db);
-runBackgrounProcess('message-processor', processMessages(repo));
+const api = buildApi(appId, messagesRepo, tenantsRepo, db);
+runBackgrounProcess('message-processor', processMessages(messagesRepo));
 
 runRegistraionProcess({
   appId,
   masterUrl: env.MASTER_URL,
   registrationEndpoint: env.REGISTRATION_ENDPOINT,
-}, repo);
+}, messagesRepo);
 
 runApi(api);

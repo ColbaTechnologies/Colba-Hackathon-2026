@@ -89,7 +89,7 @@ const addToQueue = (db: DB) => async (id: string) => {
   console.log(`Message with id ${id} added to queue`);
 }
 
-export const buildMessageRepository = (appId: UUID, db: DB) => ({
+export const messagesRepository = (appId: UUID, db: DB) => ({
   save:         saveMessage(appId, db),
   next:         getNextMessage,
   setAsSent:    setMessageAsSent(db),

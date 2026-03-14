@@ -7,10 +7,14 @@ import { type MessagesRepository } from "../../messages";
 import { type UUID } from "crypto";
 import { mapQueryEndpoints } from "../../messages/query-messages-endpoint";
 import type { DB } from "../drizzle";
+import { mapMessagesEdpoints } from "../../messages/infrastructure/endpoints";
+import { mapAuthEndpoints } from "../../auth/infrastructure/endpoints";
+import type { TenantsRepository } from "../../auth";
 
 export const buildApi = (  
   appId: UUID,
-  repo: MessagesRepository,
+  messagesRepo: MessagesRepository,
+  tenantsRepo: TenantsRepository,
   db: DB,
 ) => {
   console.log(`Building API with ID: ${appId}`);
@@ -19,8 +23,8 @@ export const buildApi = (
   app.use(logger());
   
   mapAliveEndpoint(app, appId);
-  mapIngestMessagesEndpoint(app, repo);
-  mapQueryEndpoints(app, db);
+  mapMessagesEdpoints(app, messagesRepo, db);
+  mapAuthEndpoints(app, tenantsRepo);
 
   return app;
 }
