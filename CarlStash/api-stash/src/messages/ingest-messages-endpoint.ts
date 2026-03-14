@@ -2,6 +2,7 @@ import type { Hono } from "hono";
 import { validator } from "hono/validator";
 import z from "zod";
 import type { MessagesRepository } from ".";
+import { getFakeTenant } from "../infrastructure/hono/getFakeTenant";
 
 const ingestMessagesSchema = z.object({
   destination: z.url(),
@@ -24,7 +25,7 @@ export const mapIngestMessagesEndpoint = (
   validator('header', async (headers, c) => {
     // TODO - should validate auth and get the user/tenantId
     return {
-      tenant: "d699c742-70ab-4abd-a84c-6b8185c7b938" //returning a fake one for the moment
+      tenant: getFakeTenant(),
     };
   }),
   async (c) => {

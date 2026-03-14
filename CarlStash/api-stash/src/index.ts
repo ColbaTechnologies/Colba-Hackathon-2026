@@ -10,7 +10,7 @@ const appId = crypto.randomUUID();
 const db = connectToDb(env.DATABASE_URL);
 const repo = buildMessageRepository(appId, db);
 
-const api = buildApi(appId, repo);
+const api = buildApi(appId, repo, db);
 runBackgrounProcess('message-processor', processMessages(repo));
 
 runRegistraionProcess({

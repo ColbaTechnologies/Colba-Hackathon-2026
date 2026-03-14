@@ -1,0 +1,1 @@
+export const getFakeTenant = () => "d699c742-70ab-4abd-a84c-6b8185c7b938";
