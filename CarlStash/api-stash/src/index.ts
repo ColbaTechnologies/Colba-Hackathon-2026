@@ -4,7 +4,7 @@ import { connectToDb } from './infrastructure/drizzle';
 import { env } from './infrastructure/env';
 import { buildApi, runApi } from './infrastructure/hono';
 import { messagesRepository } from './messages/infrastructure/repository';
-import { runRegistraionProcess } from './register';
+import { runRegistraionProcess } from './registration';
 import { tenantsRepository } from './auth/infrastructure/repository';
 
 const appId = crypto.randomUUID();

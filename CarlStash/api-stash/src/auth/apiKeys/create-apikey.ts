@@ -1,9 +1,9 @@
 import { randomInt } from "node:crypto";
-import type { DB } from "../infrastructure/drizzle";
-import { apiKeys } from "./infrastructure/auth.schema";
+import type { DB } from "../../infrastructure/drizzle";
+import { apiKeys } from "../infrastructure/auth.schema";
 import type { Hono } from "hono";
 import { validator } from "hono/validator";
-import type { Tenant, TenantsRepository } from ".";
+import type { TenantsRepository } from "..";
 
 const API_KEY_LENGTH = 25;
 const API_KEY_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}<>?/";
@@ -13,7 +13,7 @@ const generateApiKey = () => Array.from(
   () => API_KEY_CHARSET[randomInt(API_KEY_CHARSET.length)]
 ).join("");
 
-export const createApiKey = async (db: DB, tenantId: string) => {
+export const createApiKey = (db: DB) => async (tenantId: string) => {
   const apikey = generateApiKey();
   await db.insert(apiKeys).values({
     apikey,
@@ -30,13 +30,12 @@ export const mapCreateApiKeyEndpoint = (
   validator('header', (header, c) => {
     const tenantId = header['x-api-tenant-id'];
     const password = header['x-api-password'];
-    
     return (
       typeof tenantId !== 'string' || 
       tenantId.trim() === '' || 
       typeof password !== 'string' || 
       password.trim() === ''
-    ) ?   c.json({ error: "Missing or invalid data" }, 400) : {
+    ) ? c.json({ error: "Missing or invalid data" }, 400) : {
       tenantId,
       password
     };

@@ -2,7 +2,8 @@ import type { DB } from "../../infrastructure/drizzle";
 import type { TenantsRepository } from "..";
 import { apiKeys, tenants } from "./auth.schema";
 import { eq } from "drizzle-orm";
-import { createApiKey } from "../create-apikey";
+import { createApiKey } from "../apiKeys/create-apikey";
+import { validateApiKey } from "../apiKeys/validate-apikey";
 
 export const tenantsRepository = (db: DB): TenantsRepository => ({
   store: async (tenant) => {
@@ -13,31 +14,12 @@ export const tenantsRepository = (db: DB): TenantsRepository => ({
     if (result.length === 0) return false;
 
     const record = result[0];
-    return record.passwordHash === password; // TODO - password should be hassed
+    return record.passwordHash === password; // TODO - password should be hashed
   },
   getById: async (tenantId) => {
     const result = await db.select().from(tenants).where(eq(tenants.id, tenantId));
     return result.at(0);
   },
-  createApiKey: (tenantId) => createApiKey(db, tenantId),
-  validateApiKey: async (apiKey) => {
-    const result = await db
-      .select()
-      .from(apiKeys)
-      .where(eq(apiKeys.apikey, apiKey));
-    if (result.length === 0) return undefined;
-
-    const record = result[0];
-    const tenantResult = await db
-      .select()
-      .from(tenants)
-      .where(eq(tenants.id, record.tenantId));
-    if (tenantResult.length === 0) return undefined;
-
-    const tenantRecord = tenantResult[0];
-    return {
-      id: tenantRecord.id,
-      passwordHash: tenantRecord.passwordHash
-    };
-  }
+  createApiKey: createApiKey(db),
+  validateApiKey: validateApiKey(db)
 });

@@ -1,5 +1,5 @@
 import z from "zod";
-import type { MessagesRepository } from "./messages";
+import type { MessagesRepository } from "../messages";
 
 const registrationResponseSchema = z.object({
   messages: z.array(z.object({
