@@ -72,7 +72,7 @@ const retrigger = (appId: UUID, db: DB) => async (message: Message) => db.transa
 });
 
 const addToQueue = (db: DB) => async (id: string) => {
-  const result = await db.select().from(pendingMessages).where(eq(failedMessages.id, id));
+  const result = await db.select().from(pendingMessages).where(eq(pendingMessages.id, id));
   if (result.length === 0) {
     console.warn(`Message with id ${id} not found in pending messages`);
     return;
