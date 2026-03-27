@@ -6,7 +6,7 @@ import type { AddAppToRegistration } from "./register.js";
 
 const registrationRequestSchema = z.object({
   appId: z.uuid(),
-  url: z.string().url()
+  url: z.url()
 });
 
 export const mapRegistrationEndpoint = (
